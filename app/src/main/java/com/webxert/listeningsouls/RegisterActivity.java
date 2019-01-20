@@ -21,13 +21,19 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.webxert.listeningsouls.common.Constants;
+import com.webxert.listeningsouls.interfaces.RemoveCallBackListener;
 import com.webxert.listeningsouls.models.User;
 import com.webxert.listeningsouls.utils.Utils;
 
-public class RegisterActivity extends AppCompatActivity {
+import io.paperdb.Paper;
+
+public class RegisterActivity extends AppCompatActivity implements RemoveCallBackListener {
 
     SharedPreferences.Editor writer;
     EditText email, password, name;
@@ -36,6 +42,8 @@ public class RegisterActivity extends AppCompatActivity {
     DatabaseReference db_ref;
     CheckBox is_admin;
     boolean is_adm = false;
+    ValueEventListener valueEventListener;
+    RemoveCallBackListener removeCallBackListener;
 
 
     @Override
@@ -47,6 +55,7 @@ public class RegisterActivity extends AppCompatActivity {
         name = findViewById(R.id.name);
         is_admin = findViewById(R.id.is_admin);
 
+        removeCallBackListener = this;
 
         m_auth = FirebaseAuth.getInstance();
         db_ref = FirebaseDatabase.getInstance().getReference("Users");
@@ -75,20 +84,23 @@ public class RegisterActivity extends AppCompatActivity {
                             @Override
                             public void onClick(final DialogInterface dialog, int which) {
                                 if (editText.getText().toString().equals(Constants.DOMAIN_NAME)) {
-                                    writer.putString(Constants.AUTH_, Constants.Authentication.ADMIN.name());
-                                    writer.putBoolean(Constants.LOGIN_, true);
-                                    writer.putString(Constants.USER_EMAIL, email.getText().toString());
-                                    writer.putString(Constants.USER_NAME, name.getText().toString());
-                                    writer.apply();
+
                                     progressDialog.show();
                                     m_auth.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                                         @Override
                                         public void onSuccess(AuthResult authResult) {
                                             progressDialog.dismiss();
                                             User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", true);
+                                            writer.putString(Constants.AUTH_, Constants.Authentication.ADMIN.name());
+                                            writer.putBoolean(Constants.LOGIN_, true);
+                                            writer.putString(Constants.USER_EMAIL, email.getText().toString());
+                                            writer.putString(Constants.USER_NAME, name.getText().toString());
+                                            writer.apply();
                                             db_ref.child(authResult.getUser().getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
                                                 public void onSuccess(Void aVoid) {
+
+                                                    getAllUsers();
                                                     Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
                                                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                                     startActivity(intent);
@@ -98,6 +110,7 @@ public class RegisterActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
                                                     progressDialog.dismiss();
+                                                    Toast.makeText(RegisterActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
                                                     Log.e(RegisterActivity.class.getSimpleName(), e.getMessage());
                                                 }
                                             });
@@ -107,6 +120,7 @@ public class RegisterActivity extends AppCompatActivity {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
                                             progressDialog.dismiss();
+                                            Toast.makeText(RegisterActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
                                             Log.e(RegisterActivity.class.getSimpleName(), e.getMessage());
 
                                         }
@@ -143,10 +157,14 @@ public class RegisterActivity extends AppCompatActivity {
                                 writer.putString(Constants.USER_EMAIL, email.getText().toString());
                                 writer.putString(Constants.USER_NAME, name.getText().toString());
                                 writer.apply();
+
+
                                 User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", is_adm);
                                 db_ref.child(authResult.getUser().getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
+
+                                        getAllUsers();
                                         Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
                                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         startActivity(intent);
@@ -156,6 +174,7 @@ public class RegisterActivity extends AppCompatActivity {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
                                         progressDialog.dismiss();
+                                        Toast.makeText(RegisterActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
                                         Log.e(RegisterActivity.class.getSimpleName(), e.getMessage());
                                     }
                                 });
@@ -165,6 +184,7 @@ public class RegisterActivity extends AppCompatActivity {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 progressDialog.dismiss();
+                                Toast.makeText(RegisterActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 Log.e(RegisterActivity.class.getSimpleName(), e.getMessage());
 
                             }
@@ -178,10 +198,42 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    private void getAllUsers() {
+
+        Paper.book().delete("users");
+        Constants.userList.clear();
+
+        valueEventListener = db_ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot data : dataSnapshot.getChildren()
+                        ) {
+                    Constants.userList.add(data.getValue(User.class));
+                }
+                Paper.book().write("users", Constants.userList);
+                removeCallBackListener.onRemoveCallBack();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(RegisterActivity.this, "" + databaseError.getMessage(), Toast.LENGTH_LONG).show();
+                removeCallBackListener.onRemoveCallBack();
+            }
+        });
+
+
+    }
+
     private void resetFields() {
         name.setText("");
         password.setText("");
         email.setText("");
         is_admin.setChecked(false);
+    }
+
+    @Override
+    public void onRemoveCallBack() {
+        db_ref.removeEventListener(valueEventListener);
+
     }
 }

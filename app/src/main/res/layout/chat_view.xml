@@ -31,7 +31,7 @@
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/profile_image"
         android:text="User Name"
-        android:textSize="22sp"
+        android:textSize="20sp"
         android:textStyle="bold" />
 
 </RelativeLayout>

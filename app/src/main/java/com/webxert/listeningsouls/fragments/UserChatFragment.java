@@ -82,6 +82,7 @@ public class UserChatFragment extends Fragment {
         AdminChatFragment adminChatFragment = new AdminChatFragment();
         getActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.admin_layout, adminChatFragment)
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -92,7 +93,7 @@ public class UserChatFragment extends Fragment {
             @Override
             public void run() {
                 if (!message_found) {
-                    Toast.makeText(getContext(), "No chats found or slow connection!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "No chats found with users or slow connection!", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 }
 

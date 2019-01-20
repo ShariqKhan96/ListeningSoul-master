@@ -36,7 +36,7 @@
             android:layout_marginStart="10dp"
             android:layout_toRightOf="@+id/profile_image"
             android:text="Admin Chat"
-            android:textSize="22sp"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
     </RelativeLayout>

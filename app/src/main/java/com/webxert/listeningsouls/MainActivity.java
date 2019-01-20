@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setFragment(FrameLayout admin_layout) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.admin_layout, new UserChatFragment());
+        transaction.add(R.id.admin_layout, new UserChatFragment(), "userschat");
         transaction.commit();
     }
 

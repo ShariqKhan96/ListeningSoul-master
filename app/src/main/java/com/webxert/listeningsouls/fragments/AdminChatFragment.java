@@ -90,19 +90,13 @@ public class AdminChatFragment extends Fragment {
                         public void onSuccess(Void aVoid) {
 
                             message_text.requestFocus();
-
-                            ChatModel model = new ChatModel();
-                            model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                            model.setWith(getContext().getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
-
-                            FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                    .setValue(model);
                             displayMessages();
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Log.e(MainActivity.class.getSimpleName(), e.getMessage());
+                            Toast.makeText(getContext(), "" + e.getMessage(), Toast.LENGTH_SHORT).show();
 
                         }
                     });
@@ -111,7 +105,7 @@ public class AdminChatFragment extends Fragment {
         });
 
 
-
+        displayMessages();
 
 
         return view;
@@ -194,7 +188,7 @@ public class AdminChatFragment extends Fragment {
         mm.setView_type(saverModel.getMap().get("view_type"));
         messages.add(mm);
         adminChatAdapter.notifyDataSetChanged();
-        messageRV.scrollToPosition(adminChatAdapter.getItemCount()-1);
+        messageRV.scrollToPosition(adminChatAdapter.getItemCount() - 1);
     }
 
 

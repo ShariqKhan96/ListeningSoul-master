@@ -44,6 +44,7 @@ public class LoginActivity extends AppCompatActivity implements RemoveCallBackLi
     ValueEventListener valueEventListener;
     ProgressDialog dialog;
     RemoveCallBackListener removeCallBackListener;
+    boolean checkPrivillageAbuse = false;
 
 
     @Override
@@ -69,6 +70,7 @@ public class LoginActivity extends AppCompatActivity implements RemoveCallBackLi
         dialog.setCanceledOnTouchOutside(false);
         m_auth = FirebaseAuth.getInstance();
         users_ref = FirebaseDatabase.getInstance().getReference("Users");
+        getAllUsers();
 
         login = findViewById(R.id.login);
         signup = findViewById(R.id.register);
@@ -134,31 +136,81 @@ public class LoginActivity extends AppCompatActivity implements RemoveCallBackLi
 
     private void loginSession(final ProgressDialog dialog, final boolean is_admin) {
         dialog.show();
-        m_auth.signInWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-            @Override
-            public void onSuccess(AuthResult authResult) {
-                dialog.dismiss();
-                if (is_admin)
-                    writer.putString(Constants.AUTH_, Constants.Authentication.ADMIN.name());
-                else writer.putString(Constants.AUTH_, Constants.Authentication.CUSTOMER.name());
-                writer.putString(Constants.USER_NAME, email.getText().toString());
-                writer.putString(Constants.USER_EMAIL, email.getText().toString());
-                writer.putBoolean(Constants.LOGIN_, true);
-                writer.apply();
+        //check if admin try to login as user
 
-                getAllUsers();
+        if (!checkPrivillageAbuseAttack(is_admin, email.getText().toString(), password.getText().toString())) {
+            checkPrivillageAbuse = false;
+            m_auth.signInWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                @Override
+                public void onSuccess(AuthResult authResult) {
+                    dialog.dismiss();
+                    if (is_admin)
+                        writer.putString(Constants.AUTH_, Constants.Authentication.ADMIN.name());
+                    else
+                        writer.putString(Constants.AUTH_, Constants.Authentication.CUSTOMER.name());
+                    writer.putString(Constants.USER_NAME, email.getText().toString());
+                    writer.putString(Constants.USER_EMAIL, email.getText().toString());
+                    writer.putBoolean(Constants.LOGIN_, true);
+                    writer.apply();
 
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
+
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    dialog.dismiss();
+                    Toast.makeText(LoginActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            checkPrivillageAbuse = false;
+            dialog.dismiss();
+            Toast.makeText(this, "You cant login as user being admin!!", Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    private boolean checkPrivillageAbuseAttack(boolean is_admin, final String email, final String password) {
+        if (!is_admin) {
+            for (User user : Constants.userList) {
+                if (user.getEmail().equals(email) && user.getPassword().equals(password) && user.isIs_admin()) {
+                    checkPrivillageAbuse = true;
+                    break;
+                } else
+                    checkPrivillageAbuse = false;
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                dialog.dismiss();
-                Toast.makeText(LoginActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+//            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users");
+//            databaseReference.addValueEventListener(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                    for (DataSnapshot data : dataSnapshot.getChildren()) {
+//                        User user = data.getValue(User.class);
+//                        Log.e("User", user.getEmail() + " " + user.getPassword() + " " + user.isIs_admin());
+//                        if (user.getEmail().equals(email) && user.getPassword().equals(password) && user.isIs_admin()) {
+//                            checkPrivillageAbuse = true;
+//                            Log.e("Matched", user.isIs_admin() + "");
+//                            return;
+//                        } else checkPrivillageAbuse = false;
+//
+//
+//                    }
+//
+//                }
+//
+//                @Override
+//                public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                }
+//            });
+//        }
+        } else
+            return checkPrivillageAbuse;
+
+        Log.e("checkPrv", checkPrivillageAbuse + "");
+        return checkPrivillageAbuse;
     }
 
     private void getAllUsers() {
