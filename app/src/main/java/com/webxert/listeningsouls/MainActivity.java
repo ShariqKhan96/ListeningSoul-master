@@ -111,15 +111,6 @@ public class MainActivity extends AppCompatActivity {
             setFragment(admin_layout);
 
 
-//            tabLayout = findViewById(R.id.sliding_tabs);
-//            viewPager = findViewById(R.id.viewpager);
-//
-//
-//            ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-//            viewPager.setAdapter(adapter);
-//            tabLayout.setupWithViewPager(viewPager);
-
-
         } else if (layout_decider.equals(Constants.CUSTOMER_AUTH)) {
 
             user_layout.setVisibility(View.VISIBLE);

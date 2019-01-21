@@ -24,6 +24,7 @@
                 android:padding="5dp">
 
                 <EditText
+                    android:backgroundTint="@android:color/darker_gray"
                     android:id="@+id/email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -40,6 +41,7 @@
                 android:padding="5dp">
 
                 <EditText
+                    android:backgroundTint="@android:color/darker_gray"
                     android:id="@+id/name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -57,6 +59,7 @@
                 android:padding="5dp">
 
                 <EditText
+                    android:backgroundTint="@android:color/darker_gray"
                     android:id="@+id/password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
