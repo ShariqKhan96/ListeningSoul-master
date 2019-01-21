@@ -119,6 +119,10 @@ public class UserChatFragment extends Fragment {
                     dialog.dismiss();
                 holder.chat_with.setText(Common.getPersonName(model.getId()));
                 holder.personName.setText(model.getWith().substring(0, 1).toUpperCase());
+                if (!model.isSeen())
+                    holder.seenMessages.setVisibility(View.VISIBLE);
+                else holder.seenMessages.setVisibility(View.INVISIBLE);
+
 
                 //avatar imageview
                 holder.itemView.setOnClickListener(new View.OnClickListener() {

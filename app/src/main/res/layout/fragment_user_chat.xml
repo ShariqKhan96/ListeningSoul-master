@@ -39,6 +39,15 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
+
+        <View
+            android:layout_marginStart="5dp"
+            android:layout_below="@+id/profile_image"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginEnd="5dp"
+            android:background="@android:color/darker_gray"/>
+
     </RelativeLayout>
 
     <android.support.v7.widget.RecyclerView

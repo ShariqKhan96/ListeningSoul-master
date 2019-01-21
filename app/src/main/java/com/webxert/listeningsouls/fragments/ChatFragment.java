@@ -54,6 +54,7 @@ public class ChatFragment extends Fragment {
     EditText message_text;
     String id;
     String email;
+    DatabaseReference seenReference;
 
     ChatMessagesAdapter chatMessagesAdapter;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
@@ -73,6 +74,8 @@ public class ChatFragment extends Fragment {
         recyclerView.setAdapter(chatMessagesAdapter);
         id = getArguments().getString("id");
         email = getArguments().getString("email");
+        seenReference = FirebaseDatabase.getInstance().getReference("chats").child(id);
+        seenReference.child("seen").setValue(true);
 
         // displayMessages();
 
@@ -81,7 +84,7 @@ public class ChatFragment extends Fragment {
             public void onClick(View v) {
 
                 if (!TextUtils.isEmpty(message_text.getText().toString())) {
-                    String message =message_text.getText().toString();
+                    String message = message_text.getText().toString();
                     message_text.setText("");
                     FirebaseDatabase.getInstance().getReference("Messages").child(id)
                             .child(Constants.DOMAIN_NAME).push().setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "1", message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid(), simpleDateFormat.format(Calendar.getInstance().getTime()), "text")).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -179,7 +182,7 @@ public class ChatFragment extends Fragment {
         mm.setSent_time(saverModel.getMap().get("sent_time"));
         messages.add(mm);
         chatMessagesAdapter.notifyDataSetChanged();
-        recyclerView.scrollToPosition(chatMessagesAdapter.getItemCount()-1);
+        recyclerView.scrollToPosition(chatMessagesAdapter.getItemCount() - 1);
     }
 
 

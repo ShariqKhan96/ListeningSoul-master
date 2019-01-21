@@ -7,13 +7,23 @@ package com.webxert.listeningsouls.models;
 public class ChatModel {
     String with;
     String id;
+    boolean seen;
 
     public ChatModel() {
     }
 
-    public ChatModel(String with, String id) {
+    public ChatModel(String with, String id, boolean seen) {
         this.with = with;
         this.id = id;
+        this.seen = seen;
+    }
+
+    public boolean isSeen() {
+        return seen;
+    }
+
+    public void setSeen(boolean seen) {
+        this.seen = seen;
     }
 
     public String getWith() {
