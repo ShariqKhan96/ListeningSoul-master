@@ -40,7 +40,9 @@ import com.webxert.listeningsouls.models.MessageModel;
 import com.webxert.listeningsouls.models.SaverModel;
 import com.webxert.listeningsouls.utils.Utils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -60,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     boolean matched = false;
     boolean is_have_messages = false;
     UserChatMessageAdapter chatMessagesAdapter;
-
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
 
 
     @Override
@@ -92,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("");
         reader = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE);
         user_layout = findViewById(R.id.user_layout);
         admin_layout = findViewById(R.id.admin_layout);
@@ -137,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                         String message = message_text.getText().toString();
                         message_text.setText("");
                         FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                .child(Constants.DOMAIN_NAME).push().setValue(new MessageModel(email, "0", message, "0", FirebaseAuth.getInstance().getCurrentUser().getUid())).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                .child(Constants.DOMAIN_NAME).push().setValue(new MessageModel(email, "0", message, "0", FirebaseAuth.getInstance().getCurrentUser().getUid(), simpleDateFormat.format(Calendar.getInstance().getTime()), "text")).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
 
@@ -246,7 +249,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void addNewMessage(ArrayList<SaverModel> arrayList, ArrayList<MessageModel> messages, UserChatMessageAdapter chatMessagesAdapter, SaverModel saverModel) {
+    private void addNewMessage(ArrayList<SaverModel> arrayList, ArrayList<MessageModel> messages, UserChatMessageAdapter chatMessagesAdapter, SaverModel saverModel)
+    {
         arrayList.add(saverModel);
         MessageModel mm = new MessageModel();
         mm.setId(saverModel.getMap().get("id"));
@@ -254,9 +258,11 @@ public class MainActivity extends AppCompatActivity {
         mm.setIs_admin(saverModel.getMap().get("is_admin"));
         mm.setMessage(saverModel.getMap().get("message"));
         mm.setView_type(saverModel.getMap().get("view_type"));
+        mm.setMessage_type(saverModel.getMap().get("message_type"));
+        mm.setSent_time(saverModel.getMap().get("sent_time"));
         messages.add(mm);
         chatMessagesAdapter.notifyDataSetChanged();
-        user_recyclerview.scrollToPosition(chatMessagesAdapter.getItemCount()-1);
+        user_recyclerview.scrollToPosition(chatMessagesAdapter.getItemCount() - 1);
     }
 
 }

@@ -23,6 +23,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.webxert.listeningsouls.R;
+import com.webxert.listeningsouls.common.Common;
 import com.webxert.listeningsouls.common.Constants;
 import com.webxert.listeningsouls.models.ChatModel;
 import com.webxert.listeningsouls.models.User;
@@ -116,7 +117,7 @@ public class UserChatFragment extends Fragment {
                 message_found = true;
                 if (dialog.isShowing())
                     dialog.dismiss();
-                holder.chat_with.setText(model.getWith());
+                holder.chat_with.setText(Common.getPersonName(model.getId()));
                 holder.personName.setText(model.getWith().substring(0, 1).toUpperCase());
 
                 //avatar imageview

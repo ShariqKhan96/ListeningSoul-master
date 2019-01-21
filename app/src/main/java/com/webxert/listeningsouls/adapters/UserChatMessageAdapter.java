@@ -48,10 +48,11 @@ public class UserChatMessageAdapter extends RecyclerView.Adapter<UserChatMessage
     @Override
     public void onBindViewHolder(@NonNull MyVH myVH, int i) {
 
+        myVH.sent_time.setText(arrayList.get(i).getSent_time());
         myVH.message.setText(arrayList.get(i).getMessage());
         if (arrayList.get(i).getIs_admin().equals("1")) {
             myVH.profile_image.setVisibility(View.VISIBLE);
-            myVH.personName.setText(arrayList.get(i).getEmail().substring(0,1).toUpperCase());
+            myVH.personName.setText(arrayList.get(i).getEmail().substring(0, 1).toUpperCase());
         } else
             myVH.profile_image.setVisibility(View.GONE);
 
@@ -68,7 +69,7 @@ public class UserChatMessageAdapter extends RecyclerView.Adapter<UserChatMessage
         TextView message;
         RelativeLayout profile_image;
         TextView personName;
-
+        TextView sent_time;
 
         public MyVH(@NonNull View itemView) {
             super(itemView);
@@ -76,6 +77,7 @@ public class UserChatMessageAdapter extends RecyclerView.Adapter<UserChatMessage
             message = itemView.findViewById(R.id.message);
             profile_image = itemView.findViewById(R.id.profile_image);
             personName = itemView.findViewById(R.id.personName);
+            sent_time = itemView.findViewById(R.id.sent_time);
         }
     }
 

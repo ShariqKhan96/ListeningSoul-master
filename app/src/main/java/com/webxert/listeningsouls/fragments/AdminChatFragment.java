@@ -37,7 +37,9 @@ import com.webxert.listeningsouls.models.MessageModel;
 import com.webxert.listeningsouls.models.SaverModel;
 import com.webxert.listeningsouls.utils.Utils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -56,6 +58,7 @@ public class AdminChatFragment extends Fragment {
     SharedPreferences reader;
     boolean messages_found = false;
     ArrayList<SaverModel> arrayList = new ArrayList<>();
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
 
     public AdminChatFragment() {
         // Required empty public constructor
@@ -85,7 +88,7 @@ public class AdminChatFragment extends Fragment {
                 if (!TextUtils.isEmpty(message_text.getText().toString())) {
                     String message = message_text.getText().toString();
                     message_text.setText("");
-                    FirebaseDatabase.getInstance().getReference("AdminMessages").push().setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid())).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    FirebaseDatabase.getInstance().getReference("AdminMessages").push().setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid(), simpleDateFormat.format(Calendar.getInstance().getTime()), "text")).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
 
@@ -136,6 +139,8 @@ public class AdminChatFragment extends Fragment {
                 messages_found = true;
                 //Toast.makeText(MainActivity.this, ""+dataSnapshot.getChildrenCount(), Toast.LENGTH_SHORT).show();
                 Map<String, String> map = (Map) dataSnapshot.getValue();
+
+                Log.e("time", map.get("sent_time"));
                 SaverModel saverModel = new SaverModel(dataSnapshot.getKey(), map);
                 Log.e("Key", dataSnapshot.getKey());
                 Log.e("size", String.valueOf(arrayList.size()));
@@ -186,6 +191,8 @@ public class AdminChatFragment extends Fragment {
         mm.setIs_admin(saverModel.getMap().get("is_admin"));
         mm.setMessage(saverModel.getMap().get("message"));
         mm.setView_type(saverModel.getMap().get("view_type"));
+        mm.setMessage_type(saverModel.getMap().get("message_type"));
+        mm.setSent_time(saverModel.getMap().get("sent_time"));
         messages.add(mm);
         adminChatAdapter.notifyDataSetChanged();
         messageRV.scrollToPosition(adminChatAdapter.getItemCount() - 1);

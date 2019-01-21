@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,9 +50,11 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapte
     public void onBindViewHolder(@NonNull MyVH myVH, int i) {
 
         myVH.message.setText(arrayList.get(i).getMessage());
+     //   Log.e("time", arrayList.get(i).getSent_time());
+        myVH.sent_time.setText(arrayList.get(i).sent_time);
         if (arrayList.get(i).getIs_admin().equals("0")) {
             myVH.profile_image.setVisibility(View.VISIBLE);
-            myVH.personName.setText(arrayList.get(i).getEmail().substring(0,1).toUpperCase());
+            myVH.personName.setText(arrayList.get(i).getEmail().substring(0, 1).toUpperCase());
         } else
             myVH.profile_image.setVisibility(View.GONE);
 
@@ -68,6 +71,7 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapte
         TextView message;
         RelativeLayout profile_image;
         TextView personName;
+        TextView sent_time;
 
 
         public MyVH(@NonNull View itemView) {
@@ -76,6 +80,7 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapte
             message = itemView.findViewById(R.id.message);
             profile_image = itemView.findViewById(R.id.profile_image);
             personName = itemView.findViewById(R.id.personName);
+            sent_time = itemView.findViewById(R.id.sent_time);
         }
     }
 

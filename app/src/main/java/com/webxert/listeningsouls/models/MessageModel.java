@@ -12,17 +12,30 @@ public class MessageModel {
     String message;
     String is_admin;
     String id;
+   public String sent_time;
+   public String message_type;
 
 
     public MessageModel() {
     }
 
-    public MessageModel(String email, String view_type, String message, String is_admin, String id) {
+    public MessageModel(String email, String view_type, String message, String is_admin, String id, String sent_time, String message_type) {
         this.email = email;
         this.view_type = view_type;
         this.message = message;
         this.is_admin = is_admin;
         this.id = id;
+        this.sent_time = sent_time;
+        this.message_type = message_type;
+    }
+
+
+    public String getMessage_type() {
+        return message_type;
+    }
+
+    public void setMessage_type(String message_type) {
+        this.message_type = message_type;
     }
 
     public String getEmail() {
@@ -63,5 +76,13 @@ public class MessageModel {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getSent_time() {
+        return sent_time;
+    }
+
+    public void setSent_time(String sent_time) {
+        this.sent_time = sent_time;
     }
 }

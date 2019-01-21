@@ -24,6 +24,7 @@
 
 
     <EditText
+        android:backgroundTint="@android:color/darker_gray"
         android:id="@+id/message_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

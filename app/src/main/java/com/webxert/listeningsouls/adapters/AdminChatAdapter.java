@@ -3,6 +3,7 @@ package com.webxert.listeningsouls.adapters;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.webxert.listeningsouls.R;
 import com.webxert.listeningsouls.common.Common;
 import com.webxert.listeningsouls.models.MessageModel;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,12 +35,16 @@ public class AdminChatAdapter extends RecyclerView.Adapter<AdminChatAdapter.myVH
     class myVH extends RecyclerView.ViewHolder {
         TextView personName;
         TextView message;
+        TextView sent_time;
+
 
 
         public myVH(@NonNull View itemView) {
             super(itemView);
             personName = itemView.findViewById(R.id.personName);
             message = itemView.findViewById(R.id.message);
+            sent_time = itemView.findViewById(R.id.sent_time);
+
 
         }
     }
@@ -54,9 +61,11 @@ public class AdminChatAdapter extends RecyclerView.Adapter<AdminChatAdapter.myVH
     @Override
     public void onBindViewHolder(@NonNull AdminChatAdapter.myVH myVH, int adapterPosition) {
 
-        MessageModel message = messageModels.get(myVH.getAdapterPosition());
+        MessageModel message = messageModels.get(adapterPosition);
         myVH.message.setText(message.getMessage());
         myVH.personName.setText(Common.getPersonName(message.getId()));
+        myVH.sent_time.setText(messageModels.get(adapterPosition).sent_time);
+//        Log.e("time", messageModels.get(adapterPosition).sent_time);
 
 
     }
