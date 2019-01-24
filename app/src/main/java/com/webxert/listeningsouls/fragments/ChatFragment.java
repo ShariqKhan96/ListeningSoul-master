@@ -74,8 +74,7 @@ public class ChatFragment extends Fragment {
         recyclerView.setAdapter(chatMessagesAdapter);
         id = getArguments().getString("id");
         email = getArguments().getString("email");
-        seenReference = FirebaseDatabase.getInstance().getReference("chats").child(id);
-        seenReference.child("seen").setValue(true);
+
 
         // displayMessages();
 
@@ -118,6 +117,8 @@ public class ChatFragment extends Fragment {
     }
 
     private void displayMessages() {
+
+        markStatusToSeen();
         DatabaseReference message_ref = FirebaseDatabase.getInstance().getReference("Messages").child(id).child(Constants.DOMAIN_NAME);
 
         message_ref.addChildEventListener(new ChildEventListener() {
@@ -168,6 +169,11 @@ public class ChatFragment extends Fragment {
         });
 
 
+    }
+
+    private void markStatusToSeen() {
+        seenReference = FirebaseDatabase.getInstance().getReference("chats").child(id);
+        seenReference.child("seen").setValue(true);
     }
 
     private void addNewMessage(ArrayList<SaverModel> arrayList, ArrayList<MessageModel> messages, ChatMessagesAdapter chatMessagesAdapter, SaverModel saverModel) {

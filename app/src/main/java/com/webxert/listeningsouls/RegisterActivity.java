@@ -27,6 +27,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.webxert.listeningsouls.common.Constants;
+import com.webxert.listeningsouls.dialogs.CustomDialog;
 import com.webxert.listeningsouls.interfaces.RemoveCallBackListener;
 import com.webxert.listeningsouls.models.User;
 import com.webxert.listeningsouls.utils.Utils;
@@ -74,22 +75,24 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
                         is_adm = true;
 
                     if (is_adm) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
-                        builder.setTitle("Authentication!");
-                        builder.setMessage("Enter secret key if you are a team member");
-                        final EditText editText = new EditText(RegisterActivity.this);
-                        builder.setView(editText);
+                        final AlertDialog.Builder dialog = new AlertDialog.Builder(RegisterActivity.this);
+                        View view = getLayoutInflater().inflate(R.layout.auth_dialog, null);
+                        dialog.setView(view);
+                        Button yes = view.findViewById(R.id.yes);
+                        Button no = view.findViewById(R.id.no);
+                        final EditText edtAuth = view.findViewById(R.id.edtAuth);
 
-                        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                        final AlertDialog alertDialog = dialog.show();
+                        yes.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onClick(final DialogInterface dialog, int which) {
-                                if (editText.getText().toString().equals(Constants.DOMAIN_NAME)) {
-
+                            public void onClick(View view) {
+                                if (edtAuth.getText().toString().equals(Constants.DOMAIN_NAME)) {
                                     progressDialog.show();
                                     m_auth.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                                         @Override
                                         public void onSuccess(AuthResult authResult) {
                                             progressDialog.dismiss();
+                                            alertDialog.dismiss();
                                             User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", true);
                                             writer.putString(Constants.AUTH_, Constants.Authentication.ADMIN.name());
                                             writer.putBoolean(Constants.LOGIN_, true);
@@ -128,22 +131,20 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
 
 
                                 } else {
-                                    dialog.dismiss();
+                                    alertDialog.dismiss();
                                     progressDialog.dismiss();
                                     resetFields();
                                     Toast.makeText(RegisterActivity.this, "Your secret key is wrong!!!", Toast.LENGTH_LONG).show();
                                 }
                             }
                         });
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                        no.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                progressDialog.dismiss();
+                            public void onClick(View view) {
+                                alertDialog.dismiss();
                             }
                         });
-
-                        builder.show();
 
                     } else {
 
@@ -206,12 +207,12 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
         valueEventListener = db_ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot data : dataSnapshot.getChildren()
-                        ) {
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
                     Constants.userList.add(data.getValue(User.class));
                 }
                 Paper.book().write("users", Constants.userList);
                 removeCallBackListener.onRemoveCallBack();
+                //db_ref.removeEventListener(this); can also simply do like this
             }
 
             @Override

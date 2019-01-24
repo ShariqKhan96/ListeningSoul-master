@@ -4,93 +4,104 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="10dp"
     android:orientation="vertical"
+    android:background="@color/background"
     tools:context="com.webxert.listeningsouls.RegisterActivity">
 
     <FrameLayout
+        android:layout_margin="10dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center">
-
-        <LinearLayout
+        android:layout_height="match_parent">
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_gravity="center">
 
-            <android.support.design.widget.TextInputLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="5dp">
+                android:orientation="vertical">
 
-                <EditText
-                    android:backgroundTint="@android:color/darker_gray"
-                    android:id="@+id/email"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Email"
-                    android:inputType="textEmailAddress"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:textSize="18sp" />
-            </android.support.design.widget.TextInputLayout>
+                    android:padding="5dp">
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="5dp">
+                    <EditText
+                        android:backgroundTint="@android:color/darker_gray"
+                        android:id="@+id/email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Email"
+                        android:textColor="@android:color/black"
+                        android:inputType="textEmailAddress"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textSize="18sp" />
+                </android.support.design.widget.TextInputLayout>
 
-                <EditText
-                    android:backgroundTint="@android:color/darker_gray"
-                    android:id="@+id/name"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Name"
-                    android:inputType="textPersonName"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:textSize="18sp" />
-            </android.support.design.widget.TextInputLayout>
+                    android:padding="5dp">
+
+                    <EditText
+                        android:backgroundTint="@android:color/darker_gray"
+                        android:id="@+id/name"
+                        android:textColor="@android:color/black"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Name"
+                        android:inputType="textPersonName"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textSize="18sp" />
+                </android.support.design.widget.TextInputLayout>
 
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="5dp">
-
-                <EditText
-                    android:backgroundTint="@android:color/darker_gray"
-                    android:id="@+id/password"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Password"
-                    android:inputType="textPassword"
-                    android:maxLines="1"
-                    android:singleLine="true"
+                    android:padding="5dp">
+
+                    <EditText
+                        android:backgroundTint="@android:color/darker_gray"
+                        android:id="@+id/password"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Password"
+                        android:textColor="@android:color/black"
+                        android:inputType="textPassword"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textSize="18sp" />
+                </android.support.design.widget.TextInputLayout>
+
+                <CheckBox
+                    android:id="@+id/is_admin"
+                    android:layout_width="wrap_content"
+                    android:backgroundTint="@color/colorPrimaryDark"
+                    android:buttonTint="@color/colorPrimaryDark"
+                    android:layout_height="wrap_content"
+                    android:text="Register as admin"
                     android:textSize="18sp" />
-            </android.support.design.widget.TextInputLayout>
 
-            <CheckBox
-                android:id="@+id/is_admin"
-                android:layout_width="wrap_content"
-                android:backgroundTint="@color/colorPrimary"
-                android:buttonTint="@color/colorPrimary"
-                android:layout_height="wrap_content"
-                android:text="Register as admin"
-                android:textSize="18sp" />
+                <Button
+                    android:id="@+id/register"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:padding="10dp"
+                    android:text="Register"
+                    android:textColor="@android:color/black"
+                    android:background="@drawable/button_layout"
+                    android:textAllCaps="false"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
-            <Button
-                android:id="@+id/register"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:padding="10dp"
-                android:text="Register"
-                android:textAllCaps="false"
-                android:textSize="16sp" />
-        </LinearLayout>
-
+        </FrameLayout>
     </FrameLayout>
+
 
 
 </FrameLayout>

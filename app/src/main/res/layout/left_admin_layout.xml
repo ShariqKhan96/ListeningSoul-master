@@ -42,7 +42,7 @@
                 android:paddingEnd="10dp"
                 android:paddingBottom="10dp"
                 android:text="Message"
-                android:textColor="@android:color/white"
+                android:textColor="@android:color/black"
                 android:textSize="18sp" />
         </RelativeLayout>
 

@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -26,6 +27,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.webxert.listeningsouls.common.Constants;
+import com.webxert.listeningsouls.dialogs.CustomDialog;
 import com.webxert.listeningsouls.interfaces.RemoveCallBackListener;
 import com.webxert.listeningsouls.models.User;
 
@@ -42,7 +44,7 @@ public class LoginActivity extends AppCompatActivity implements RemoveCallBackLi
     FirebaseAuth m_auth;
     boolean is_admin = false;
     ValueEventListener valueEventListener;
-    ProgressDialog dialog;
+    ProgressDialog progressDialog;
     RemoveCallBackListener removeCallBackListener;
     boolean checkPrivillageAbuse = false;
 
@@ -64,10 +66,10 @@ public class LoginActivity extends AppCompatActivity implements RemoveCallBackLi
         password = findViewById(R.id.password);
         removeCallBackListener = this;
 
-        dialog = new ProgressDialog(this);
-        dialog.setTitle("Authenticating");
-        dialog.setMessage("Please Wait");
-        dialog.setCanceledOnTouchOutside(false);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Authenticating");
+        progressDialog.setMessage("Please Wait");
+        progressDialog.setCanceledOnTouchOutside(false);
         m_auth = FirebaseAuth.getInstance();
         users_ref = FirebaseDatabase.getInstance().getReference("Users");
         getAllUsers();
@@ -98,41 +100,45 @@ public class LoginActivity extends AppCompatActivity implements RemoveCallBackLi
                         is_admin = false;
                     }
                     if (is_admin) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                        builder.setTitle("Authentication!");
-                        builder.setMessage("Enter secret key if you are a team member");
-                        final EditText editText = new EditText(LoginActivity.this);
-                        builder.setView(editText);
+                        final AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this);
+                        View view = getLayoutInflater().inflate(R.layout.auth_dialog, null);
+                        dialog.setView(view);
+                        Button yes = view.findViewById(R.id.yes);
+                        Button no = view.findViewById(R.id.no);
+                        final EditText edtAuth = view.findViewById(R.id.edtAuth);
 
-                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        final AlertDialog alertDialog = dialog.show();
+                        yes.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                if (editText.getText().toString().equals(Constants.DOMAIN_NAME)) {
-                                    dialogInterface.dismiss();
-                                    loginSession(dialog, true);
+                            public void onClick(View view) {
+                                if (edtAuth.getText().toString().equals(Constants.DOMAIN_NAME)) {
+                                    alertDialog.dismiss();
+                                    loginSession(progressDialog, true);
+
 
                                 } else {
+                                    alertDialog.dismiss();
                                     Toast.makeText(LoginActivity.this, "Secret key not matched!", Toast.LENGTH_SHORT).show();
-                                    dialogInterface.dismiss();
                                 }
                             }
                         });
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                        no.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
+                            public void onClick(View view) {
+                                alertDialog.dismiss();
                             }
                         });
-                        builder.show();
+
+
                         //dialog.show();
                     } else {
-                        loginSession(dialog, false);
+                        loginSession(progressDialog, false);
                         //Log.e("Notadmin", authResult.getUser().getUid());
                     }
-                }else
-                    {
-                        Toast.makeText(LoginActivity.this, "Emplty Field(s)!", Toast.LENGTH_SHORT).show();
-                    }
+                } else {
+                    Toast.makeText(LoginActivity.this, "Emplty Field(s)!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -140,7 +146,6 @@ public class LoginActivity extends AppCompatActivity implements RemoveCallBackLi
     private void loginSession(final ProgressDialog dialog, final boolean is_admin) {
         dialog.show();
         //check if admin try to login as user
-
         if (!checkPrivillageAbuseAttack(is_admin, email.getText().toString(), password.getText().toString())) {
             checkPrivillageAbuse = false;
             m_auth.signInWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnSuccessListener(new OnSuccessListener<AuthResult>() {

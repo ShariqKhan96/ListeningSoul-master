@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     tools:context="com.webxert.listeningsouls.fragments.UserChatFragment">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -22,7 +23,7 @@
                 android:layout_centerVertical="true"
                 android:gravity="center"
                 android:text="A"
-                android:textColor="@android:color/white"
+                android:textColor="@color/colorAccent"
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
@@ -46,7 +47,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginEnd="5dp"
-            android:background="@android:color/darker_gray"/>
+            android:background="@color/darkGrey"/>
 
     </RelativeLayout>
 

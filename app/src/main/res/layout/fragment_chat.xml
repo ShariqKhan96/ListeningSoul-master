@@ -2,6 +2,7 @@
     android:id="@+id/user_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <android.support.v7.widget.RecyclerView
@@ -28,6 +29,7 @@
         android:id="@+id/message_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@android:color/black"
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@+id/submit_button" />
 </RelativeLayout>

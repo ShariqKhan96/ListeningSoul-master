@@ -28,7 +28,7 @@
                 android:gravity="center"
                 android:paddingBottom="3dp"
                 android:text="A"
-                android:textColor="@android:color/white"
+                android:textColor="@color/colorAccent"
                 android:textSize="20sp"
                 android:textStyle="bold" />
         </RelativeLayout>
@@ -44,7 +44,7 @@
             android:background="@drawable/left"
             android:padding="10dp"
             android:text="Message"
-            android:textColor="@android:color/white"
+            android:textColor="@android:color/black"
             android:textSize="18sp" />
 
     </RelativeLayout>

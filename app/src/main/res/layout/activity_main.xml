@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
@@ -14,8 +15,9 @@
         android:layout_height="55dp">
 
             <TextView
+
                 android:layout_gravity="center"
-                android:textColor="@android:color/white"
+                android:textColor="@android:color/black"
                 android:text="Listening Souls"
                 android:textSize="20sp"
                 android:layout_width="wrap_content"
@@ -37,6 +39,7 @@
 
 
     <RelativeLayout
+        android:background="@color/background"
         android:visibility="gone"
         android:id="@+id/user_layout"
         android:layout_width="match_parent"
@@ -63,9 +66,11 @@
 
 
         <EditText
+            android:background="@color/foreground"
             android:backgroundTint="@android:color/darker_gray"
             android:id="@+id/message_text"
             android:layout_width="match_parent"
+            android:textColor="@android:color/black"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_marginTop="10dp"
@@ -84,7 +89,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Something went wrong"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@android:color/black"
             android:textSize="28sp" />
 
     </FrameLayout>

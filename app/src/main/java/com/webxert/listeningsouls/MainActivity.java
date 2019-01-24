@@ -141,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
                                 model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                 model.setSeen(false);
                                 model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
-
                                 FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                         .setValue(model);
                                 displayMessages();
@@ -237,8 +236,6 @@ public class MainActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
-
-
     }
 
     private void addNewMessage(ArrayList<SaverModel> arrayList, ArrayList<MessageModel> messages, UserChatMessageAdapter chatMessagesAdapter, SaverModel saverModel) {
