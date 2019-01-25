@@ -35,10 +35,10 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="10dp"
+            android:textColor="@android:color/black"
             android:layout_toRightOf="@+id/profile_image"
             android:text="Admin Chat"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textSize="20sp" />
 
 
         <View
@@ -47,7 +47,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginEnd="5dp"
-            android:background="@color/darkGrey"/>
+            android:background="@android:color/darker_gray"/>
 
     </RelativeLayout>
 

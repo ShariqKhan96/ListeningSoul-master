@@ -91,7 +91,7 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
                                     m_auth.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                                         @Override
                                         public void onSuccess(AuthResult authResult) {
-                                            progressDialog.dismiss();
+
                                             alertDialog.dismiss();
                                             User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", true);
                                             writer.putString(Constants.AUTH_, Constants.Authentication.ADMIN.name());
@@ -102,7 +102,7 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
                                             db_ref.child(authResult.getUser().getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
                                                 public void onSuccess(Void aVoid) {
-
+                                                    progressDialog.dismiss();
                                                     getAllUsers();
                                                     Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
                                                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
