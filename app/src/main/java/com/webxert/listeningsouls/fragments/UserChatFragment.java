@@ -30,7 +30,10 @@ import com.webxert.listeningsouls.models.User;
 import com.webxert.listeningsouls.utils.Utils;
 import com.webxert.listeningsouls.viewholders.ChatViewHolder;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -100,10 +103,11 @@ public class UserChatFragment extends Fragment {
 
             }
         }, 6000);
+
         dialog = Utils.getChatProgressDialog(getContext());
         dialog.show();
         //yahan query bhi dfferent hogi users wali nahi chalygi
-        Query query = FirebaseDatabase.getInstance().getReference("chats");
+        Query query = FirebaseDatabase.getInstance().getReference("chats").orderByChild("timestamp");
         /*chats.child(wo saray log ki id jihun nai chat ki hai admin sai)*/
 
         FirebaseRecyclerOptions<ChatModel> options = new FirebaseRecyclerOptions.Builder<ChatModel>()
@@ -114,7 +118,9 @@ public class UserChatFragment extends Fragment {
             @Override
             protected void onBindViewHolder(@NonNull ChatViewHolder holder, int position, @NonNull final ChatModel model) {
 
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
                 message_found = true;
+                holder.messageTime.setText(format.format(model.getDate().getTime()));
                 if (dialog.isShowing())
                     dialog.dismiss();
                 holder.chat_with.setText(Common.getPersonName(model.getId()));

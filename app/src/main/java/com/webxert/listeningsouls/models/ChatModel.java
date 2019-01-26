@@ -1,5 +1,7 @@
 package com.webxert.listeningsouls.models;
 
+import java.util.Date;
+
 /**
  * Created by hp on 12/18/2018.
  */
@@ -8,14 +10,35 @@ public class ChatModel {
     String with;
     String id;
     boolean seen;
+    Date date;
+    long timestamp;
+
 
     public ChatModel() {
     }
 
-    public ChatModel(String with, String id, boolean seen) {
+    public ChatModel(String with, String id, boolean seen, Date date, long timestamp) {
         this.with = with;
         this.id = id;
         this.seen = seen;
+        this.date = date;
+        this.timestamp = timestamp;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public boolean isSeen() {

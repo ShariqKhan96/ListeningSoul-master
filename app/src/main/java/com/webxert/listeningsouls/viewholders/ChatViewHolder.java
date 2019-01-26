@@ -19,6 +19,8 @@ public class ChatViewHolder extends RecyclerView.ViewHolder {
    public RelativeLayout profile_image;
    public TextView personName;
    public TextView seenMessages;
+   public TextView messageTime;
+
 
 
     public ChatViewHolder(@NonNull View itemView) {
@@ -28,7 +30,9 @@ public class ChatViewHolder extends RecyclerView.ViewHolder {
         profile_image = itemView.findViewById(R.id.profile_image);
         personName = itemView.findViewById(R.id.personName);
         seenMessages = itemView.findViewById(R.id.message_seen);
+        messageTime = itemView.findViewById(R.id.chat_time);
     }
+
 }
 
 

@@ -43,6 +43,7 @@ import com.webxert.listeningsouls.utils.Utils;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -140,6 +141,11 @@ public class MainActivity extends AppCompatActivity {
                                 ChatModel model = new ChatModel();
                                 model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                 model.setSeen(false);
+
+                                Date date = Calendar.getInstance().getTime();
+                                Log.e("date",date.toString());
+                                model.setDate(date);
+                                model.setTimestamp(-1*new Date().getTime());
                                 model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
                                 FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                         .setValue(model);
