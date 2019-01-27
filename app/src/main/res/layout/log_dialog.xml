@@ -18,7 +18,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Authentication"
+            android:text="Last Note By:"
             android:textColor="@android:color/black"
             android:textStyle="bold"
             android:textSize="20sp" />
@@ -27,30 +27,61 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="Enter secret key if you are a team member"
+            android:text="No one"
+            android:id="@+id/by"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
+        <TextView
+            android:layout_marginTop="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Note:"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:textSize="20sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/note"
+            android:layout_marginTop="5dp"
+            android:text=""
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            />
+
         <EditText
-            android:id="@+id/edtAuth"
+            android:id="@+id/edtNote"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
+            android:hint="Enter note"
             android:textColor="@android:color/black"
             />
 
         <LinearLayout
-            android:weightSum="2"
+            android:weightSum="3"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="45dp">
 
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/button_layout"
-                android:text="Authenticate"
-                android:id="@+id/yes"
+                android:text="Clear note"
+                android:id="@+id/remove"
+                android:textAllCaps="false"
+                />
+            <Button
+                android:layout_marginStart="5dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_layout"
+                android:text="Update"
+                android:id="@+id/update"
                 android:textAllCaps="false"
                 />
             <Button
@@ -60,7 +91,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/button_layout"
                 android:text="Cancel"
-                android:id="@+id/no"
+                android:id="@+id/dismiss"
                 android:textAllCaps="false"
                 />
 

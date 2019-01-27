@@ -224,16 +224,22 @@ public class LoginActivity extends AppCompatActivity implements RemoveCallBackLi
     private void getAllUsers() {
 
         Paper.book().delete("users");
+        Paper.book().delete("admins");
         Constants.userList.clear();
+        Constants.adminList.clear();
 
         valueEventListener = users_ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot data : dataSnapshot.getChildren()
                         ) {
+                    if (data.child("is_admin").getValue().toString().equals("true"))
+                        Constants.adminList.add(data.getValue(User.class));
                     Constants.userList.add(data.getValue(User.class));
                 }
+
                 Paper.book().write("users", Constants.userList);
+                Paper.book().write("admins", Constants.adminList);
                 removeCallBackListener.onRemoveCallBack();
             }
 

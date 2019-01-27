@@ -106,8 +106,10 @@ public class UserChatFragment extends Fragment {
 
         dialog = Utils.getChatProgressDialog(getContext());
         dialog.show();
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("chats");
+        dbRef.keepSynced(true);
         //yahan query bhi dfferent hogi users wali nahi chalygi
-        Query query = FirebaseDatabase.getInstance().getReference("chats").orderByChild("timestamp");
+        Query query = dbRef.orderByChild("timestamp");
         /*chats.child(wo saray log ki id jihun nai chat ki hai admin sai)*/
 
         FirebaseRecyclerOptions<ChatModel> options = new FirebaseRecyclerOptions.Builder<ChatModel>()
@@ -128,6 +130,11 @@ public class UserChatFragment extends Fragment {
                 if (!model.isSeen())
                     holder.seenMessages.setVisibility(View.VISIBLE);
                 else holder.seenMessages.setVisibility(View.INVISIBLE);
+
+                if (model.getAssignedTo().equals("None"))
+                    holder.assignedTo.setText(new StringBuilder("Assigned To: None"));
+                else
+                    holder.assignedTo.setText(new StringBuilder("Assigned To: ").append(Common.getPersonName(model.getAssignedTo())));
 
 
                 //avatar imageview

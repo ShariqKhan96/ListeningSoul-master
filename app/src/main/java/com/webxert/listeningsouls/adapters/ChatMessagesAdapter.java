@@ -59,6 +59,13 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapte
             myVH.profile_image.setVisibility(View.GONE);
 
 
+//        if (i == arrayList.size() - 1) {
+//            if (arrayList.get(i).is_seen) {
+//                myVH.is_seen.setText("Seen");
+//            } else
+//                myVH.is_seen.setVisibility(View.GONE);
+//        }
+
     }
 
     @Override
@@ -72,6 +79,7 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapte
         RelativeLayout profile_image;
         TextView personName;
         TextView sent_time;
+        TextView is_seen;
 
 
         public MyVH(@NonNull View itemView) {
@@ -81,6 +89,7 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapte
             profile_image = itemView.findViewById(R.id.profile_image);
             personName = itemView.findViewById(R.id.personName);
             sent_time = itemView.findViewById(R.id.sent_time);
+            is_seen = itemView.findViewById(R.id.message_seen);
         }
     }
 

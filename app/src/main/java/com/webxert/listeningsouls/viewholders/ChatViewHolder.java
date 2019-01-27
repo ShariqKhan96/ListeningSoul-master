@@ -20,6 +20,7 @@ public class ChatViewHolder extends RecyclerView.ViewHolder {
    public TextView personName;
    public TextView seenMessages;
    public TextView messageTime;
+  public TextView assignedTo;
 
 
 
@@ -31,6 +32,7 @@ public class ChatViewHolder extends RecyclerView.ViewHolder {
         personName = itemView.findViewById(R.id.personName);
         seenMessages = itemView.findViewById(R.id.message_seen);
         messageTime = itemView.findViewById(R.id.chat_time);
+        assignedTo = itemView.findViewById(R.id.assign_to);
     }
 
 }

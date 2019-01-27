@@ -55,6 +55,13 @@ public class UserChatMessageAdapter extends RecyclerView.Adapter<UserChatMessage
             myVH.personName.setText(arrayList.get(i).getEmail().substring(0, 1).toUpperCase());
         } else
             myVH.profile_image.setVisibility(View.GONE);
+//
+//        if (i == arrayList.size() - 1) {
+//            if (arrayList.get(i).is_seen) {
+//                myVH.is_seen.setText("Seen");
+//            } else
+//                myVH.is_seen.setVisibility(View.GONE);
+//        }
 
 
     }
@@ -70,6 +77,7 @@ public class UserChatMessageAdapter extends RecyclerView.Adapter<UserChatMessage
         RelativeLayout profile_image;
         TextView personName;
         TextView sent_time;
+        TextView is_seen;
 
         public MyVH(@NonNull View itemView) {
             super(itemView);
@@ -78,6 +86,7 @@ public class UserChatMessageAdapter extends RecyclerView.Adapter<UserChatMessage
             profile_image = itemView.findViewById(R.id.profile_image);
             personName = itemView.findViewById(R.id.personName);
             sent_time = itemView.findViewById(R.id.sent_time);
+            is_seen = itemView.findViewById(R.id.message_seen);
         }
     }
 

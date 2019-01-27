@@ -32,6 +32,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.webxert.listeningsouls.adapters.UserChatMessageAdapter;
 import com.webxert.listeningsouls.common.Constants;
 import com.webxert.listeningsouls.fragments.UserChatFragment;
@@ -64,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     boolean is_have_messages = false;
     UserChatMessageAdapter chatMessagesAdapter;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
+    ValueEventListener seenListener;
+    DatabaseReference seenReference;
 
 
     @Override
@@ -84,7 +87,10 @@ public class MainActivity extends AppCompatActivity {
             getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).edit().clear().apply();
             FirebaseAuth.getInstance().signOut();
             startActivity(intent);
-        }
+        } else if (R.id.log == item.getItemId()) {
+            return false;
+        } else if (R.id.assign_to == item.getItemId())
+            return false;
 
         return true;
     }
@@ -96,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
+
         reader = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE);
         user_layout = findViewById(R.id.user_layout);
         admin_layout = findViewById(R.id.admin_layout);
@@ -132,24 +139,25 @@ public class MainActivity extends AppCompatActivity {
                         String message = message_text.getText().toString();
                         message_text.setText("");
                         FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                .child(Constants.DOMAIN_NAME).push().setValue(new MessageModel(email, "0", message, "0", FirebaseAuth.getInstance().getCurrentUser().getUid(), simpleDateFormat.format(Calendar.getInstance().getTime()), "text")).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                .child(Constants.DOMAIN_NAME).push().
+                                setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", message, "0", FirebaseAuth.getInstance().getCurrentUser().getUid(), simpleDateFormat.format(Calendar.getInstance().getTime()), "text")).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-
                                 message_text.requestFocus();
 
                                 ChatModel model = new ChatModel();
                                 model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                 model.setSeen(false);
-
                                 Date date = Calendar.getInstance().getTime();
-                                Log.e("date",date.toString());
+                                Log.e("date", date.toString());
                                 model.setDate(date);
-                                model.setTimestamp(-1*new Date().getTime());
+                                model.setTimestamp(-1 * new Date().getTime());
+                                model.setAssignedTo("None");
                                 model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
                                 FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                         .setValue(model);
                                 displayMessages();
+
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -165,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
             displayMessages();
 
 
+
         } else {
             FrameLayout placeholder = findViewById(R.id.placeholder_layout);
             placeholder.setVisibility(View.VISIBLE);
@@ -172,6 +181,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+
 
     private void setFragment(FrameLayout admin_layout) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -182,6 +193,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayMessages() {
 
+       // setLogReference();
+       // markStatusToSeen();
         final ProgressDialog dialog = Utils.getMessageProgressDialog(this);
         dialog.show();
 
@@ -227,6 +240,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
             }
 
             @Override
@@ -244,6 +258,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void setLogReference() {
+        DatabaseReference logRef = FirebaseDatabase.getInstance().getReference("Logs");
+        com.webxert.listeningsouls.models.Log log = new com.webxert.listeningsouls.models.Log();
+        log.setBy("No one");
+        log.setNote("");
+        log.setTime("");
+        logRef.setValue(log);
+    }
+
     private void addNewMessage(ArrayList<SaverModel> arrayList, ArrayList<MessageModel> messages, UserChatMessageAdapter chatMessagesAdapter, SaverModel saverModel) {
         arrayList.add(saverModel);
         MessageModel mm = new MessageModel();
@@ -258,5 +281,14 @@ public class MainActivity extends AppCompatActivity {
         chatMessagesAdapter.notifyDataSetChanged();
         user_recyclerview.scrollToPosition(chatMessagesAdapter.getItemCount() - 1);
     }
+    private void markStatusToSeen() {
+        seenReference = FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        seenReference.child("seen").setValue(true);
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+    }
 }

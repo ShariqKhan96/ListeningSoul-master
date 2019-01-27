@@ -30,6 +30,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.webxert.listeningsouls.MainActivity;
 import com.webxert.listeningsouls.R;
 import com.webxert.listeningsouls.adapters.AdminChatAdapter;
+import com.webxert.listeningsouls.adapters.ChatMessagesAdapter;
 import com.webxert.listeningsouls.adapters.UserChatMessageAdapter;
 import com.webxert.listeningsouls.common.Constants;
 import com.webxert.listeningsouls.models.ChatModel;
@@ -88,7 +89,8 @@ public class AdminChatFragment extends Fragment {
                 if (!TextUtils.isEmpty(message_text.getText().toString())) {
                     String message = message_text.getText().toString();
                     message_text.setText("");
-                    FirebaseDatabase.getInstance().getReference("AdminMessages").push().setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid(), simpleDateFormat.format(Calendar.getInstance().getTime()), "text")).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    FirebaseDatabase.getInstance().getReference("AdminMessages").push().
+                            setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "1", message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid(), simpleDateFormat.format(Calendar.getInstance().getTime()), "text")).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
 
@@ -140,7 +142,7 @@ public class AdminChatFragment extends Fragment {
                 //Toast.makeText(MainActivity.this, ""+dataSnapshot.getChildrenCount(), Toast.LENGTH_SHORT).show();
                 Map<String, String> map = (Map) dataSnapshot.getValue();
 
-                Log.e("time", map.get("sent_time"));
+                Log.e("time", map.get("sent_time").toString());
                 SaverModel saverModel = new SaverModel(dataSnapshot.getKey(), map);
                 Log.e("Key", dataSnapshot.getKey());
                 Log.e("size", String.valueOf(arrayList.size()));
@@ -197,6 +199,5 @@ public class AdminChatFragment extends Fragment {
         adminChatAdapter.notifyDataSetChanged();
         messageRV.scrollToPosition(adminChatAdapter.getItemCount() - 1);
     }
-
 
 }

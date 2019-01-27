@@ -12,17 +12,19 @@ public class ChatModel {
     boolean seen;
     Date date;
     long timestamp;
+    String assignedTo;
 
 
     public ChatModel() {
     }
 
-    public ChatModel(String with, String id, boolean seen, Date date, long timestamp) {
+    public ChatModel(String with, String id, boolean seen, Date date, long timestamp, String assignedTo) {
         this.with = with;
         this.id = id;
         this.seen = seen;
         this.date = date;
         this.timestamp = timestamp;
+        this.assignedTo = assignedTo;
     }
 
     public long getTimestamp() {
@@ -64,4 +66,13 @@ public class ChatModel {
     public void setId(String id) {
         this.id = id;
     }
+
+    public String getAssignedTo() {
+        return assignedTo;
+    }
+
+    public void setAssignedTo(String assignedTo) {
+        this.assignedTo = assignedTo;
+    }
 }
+

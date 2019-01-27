@@ -17,7 +17,7 @@
         android:layout_weight="1"
         android:text="2019-01-09 11:00 AM"
         android:textSize="12sp"
-        android:layout_gravity="bottom"
+        android:layout_gravity="center"
         android:textStyle="bold"
 
         />
@@ -61,6 +61,15 @@
             android:text="Message"
            android:textColor="@android:color/black"
             android:textSize="18sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/message_seen"
+            android:text="seen"
+            android:visibility="gone"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/message"
+            />
     </RelativeLayout>
 
 
