@@ -6,12 +6,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -22,9 +26,11 @@ import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.webxert.listeningsouls.MainActivity;
 import com.webxert.listeningsouls.R;
 import com.webxert.listeningsouls.common.Common;
 import com.webxert.listeningsouls.common.Constants;
+import com.webxert.listeningsouls.interfaces.LogoutListener;
 import com.webxert.listeningsouls.models.ChatModel;
 import com.webxert.listeningsouls.models.User;
 import com.webxert.listeningsouls.utils.Utils;
@@ -48,6 +54,7 @@ public class UserChatFragment extends Fragment {
     ProgressDialog dialog;
     boolean message_found;
     RelativeLayout chat_admin_layout;
+    LogoutListener logoutListener;
 
 
     public static UserChatFragment getInstance() {
@@ -60,6 +67,29 @@ public class UserChatFragment extends Fragment {
 
     }
 
+    public void setLogoutListener(LogoutListener logoutListener) {
+        this.logoutListener = logoutListener;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.admin_chat_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (R.id.logout == item.getItemId())
+            logoutListener.onLogout();
+        return true;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -84,6 +114,7 @@ public class UserChatFragment extends Fragment {
 
     private void openAdminFragment() {
         AdminChatFragment adminChatFragment = new AdminChatFragment();
+        adminChatFragment.setLogoutListener(logoutListener);
         getActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.admin_layout, adminChatFragment)
                 .addToBackStack(null)
@@ -166,6 +197,7 @@ public class UserChatFragment extends Fragment {
         bundle.putString("email", email);
 
         ChatFragment chatFragment = new ChatFragment();
+        chatFragment.setLogoutListener(logoutListener);
         chatFragment.setArguments(bundle);
         getActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.admin_layout, chatFragment)

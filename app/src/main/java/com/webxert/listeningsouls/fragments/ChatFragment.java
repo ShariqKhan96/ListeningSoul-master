@@ -33,15 +33,19 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.webxert.listeningsouls.MainActivity;
 import com.webxert.listeningsouls.R;
 import com.webxert.listeningsouls.adapters.ChatMessagesAdapter;
 import com.webxert.listeningsouls.common.Common;
 import com.webxert.listeningsouls.common.Constants;
+import com.webxert.listeningsouls.interfaces.LogoutListener;
 import com.webxert.listeningsouls.models.ChatModel;
 import com.webxert.listeningsouls.models.MessageModel;
 import com.webxert.listeningsouls.models.SaverModel;
+
+import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,10 +66,15 @@ public class ChatFragment extends Fragment {
     ArrayList<MessageModel> messages = new ArrayList<>();
     boolean matched = false;
     final DatabaseReference logRef = FirebaseDatabase.getInstance().getReference("Logs");
-
+    LogoutListener logoutListener;
+    DatabaseReference markSeenRef;
 
     public ChatFragment() {
 
+    }
+
+    public void setLogoutListener(LogoutListener logoutListener) {
+        this.logoutListener = logoutListener;
     }
 
     public RecyclerView recyclerView;
@@ -75,6 +84,7 @@ public class ChatFragment extends Fragment {
     String id;
     String email;
     DatabaseReference seenReference;
+    ValueEventListener seenEventListener;
 
     ChatMessagesAdapter chatMessagesAdapter;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
@@ -87,6 +97,7 @@ public class ChatFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
         inflater.inflate(R.menu.admin_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -99,10 +110,78 @@ public class ChatFragment extends Fragment {
         } else if (R.id.assign_to == item.getItemId()) {
             showAssignmentDialog();
 
-        }
+        } else if (R.id.convo_status == item.getItemId())
+            showConversationStatusDalog();
+        else if (R.id.logout == item.getItemId())
+            logout();
+
         return true;
 
 
+    }
+
+    private void logout() {
+        logoutListener.onLogout();
+    }
+
+    private void showConversationStatusDalog() {
+        View view = getLayoutInflater().inflate(R.layout.convo_details, null);
+        final TextView by = view.findViewById(R.id.by);
+        final TextView seenTxt = view.findViewById(R.id.seen_text);
+        final Button dismiss = view.findViewById(R.id.dismiss);
+        final TextView convo_status = view.findViewById(
+                R.id.convo_status
+        );
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setView(view);
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dismiss.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        DatabaseReference seenReference = FirebaseDatabase.getInstance().getReference("Messages").child(id).child(Constants.DOMAIN_NAME);
+        Query query = seenReference.limitToLast(1);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.e("Datasnapshot", dataSnapshot.getValue().toString());
+                for (DataSnapshot data : dataSnapshot.getChildren()
+                        ) {
+                    MessageModel model = data.getValue(MessageModel.class);
+
+                    Log.e("Model", model.getId());
+                    if (dataSnapshot.getChildrenCount() > 0) {
+
+                        if (model.getId_sender().equals(Constants.DOMAIN_NAME) && model.getId_receiver()
+                                .equals(id)) {
+                            by.setText(Common.getPersonName(model.getId()));
+                            seenTxt.setText(model.getStatus());
+
+                        } else if (model.getId_sender().equals(id) && model.getId_receiver()
+                                .equals(Constants.DOMAIN_NAME)) {
+                            //by.setText("Patient: -> " + Common.getPersonName(id));
+                            by.setText("Patient");
+                            //seenTxt.setText("You have no pending messages to be seen!");
+                            seenTxt.setVisibility(View.GONE);
+                            convo_status.setVisibility(View.GONE);
+                        }
+
+                    } else {
+                        seenTxt.setText("No messages!");
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("MessageStatus", databaseError.getMessage());
+                dialog.dismiss();
+            }
+        });
     }
 
     private void showNoteDialog() {
@@ -175,7 +254,7 @@ public class ChatFragment extends Fragment {
                 map.put("note", edtNote.getText().toString());
                 map.put("by", Common.getPersonName(FirebaseAuth.getInstance().getCurrentUser().getUid()));
                 map.put("time", format.format(Calendar.getInstance().getTime()));
-                logRef.child(id).updateChildren(map);
+                logRef.updateChildren(map);
                 dialog.dismiss();
 
             }
@@ -210,6 +289,7 @@ public class ChatFragment extends Fragment {
                 // Toast.makeText(getContext(), "Position: " + which + " Value: " + usersName[which], Toast.LENGTH_LONG).show();
                 String assignedUserId = usersIds[which];
                 updateAssignedId(assignedUserId);
+               Paper.book().write("assign_id", assignedUserId);
                 dialog.dismiss();
             }
         });
@@ -252,21 +332,14 @@ public class ChatFragment extends Fragment {
                     message_text.setText("");
                     FirebaseDatabase.getInstance().getReference("Messages").child(id)
                             .child(Constants.DOMAIN_NAME).push().setValue
-                            (new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "1", message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid(), simpleDateFormat.format(Calendar.getInstance().getTime()), "text")).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            (new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "1",
+                                    message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                    simpleDateFormat.format(Calendar.getInstance().getTime()), "text", Constants.DOMAIN_NAME, id, "Not Seen")).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
                             //message_text.setText("");
                             message_text.requestFocus();
-//                            ChatModel model = new ChatModel();
-//                            model.setId(id);
-//                            model.setSeen(false);
-//                            Date date = Calendar.getInstance().getTime();
-//                            Log.e("date", date.toString());
-//                            model.setDate(date);
-//                            model.setTimestamp(-1 * new Date().getTime());
-//                            model.setWith(email);
-//                            FirebaseDatabase.getInstance().getReference("chats").child(id)
-//                                    .setValue(model);
+
                             displayMessages();
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -350,6 +423,42 @@ public class ChatFragment extends Fragment {
     private void markStatusToSeen() {
         seenReference = FirebaseDatabase.getInstance().getReference("chats").child(id);
         seenReference.child("seen").setValue(true);
+        markSeenRef = FirebaseDatabase.getInstance().getReference("Messages").child(id).child(Constants.DOMAIN_NAME);
+        Query query = markSeenRef.limitToLast(1);
+        seenEventListener = query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.getChildrenCount() > 0) {
+                    MessageModel model = dataSnapshot.getChildren().iterator().next().getValue(MessageModel.class);
+
+                    if (model.getId_sender().equals(id) && model.getId_receiver().equals(Constants.DOMAIN_NAME))
+                        updateChildren(dataSnapshot.getChildren().iterator().next().getRef(), model);
+
+                    // markSeenRef.child(dataSnapshot.getKey()).child("status").setValue("Seen");
+//                    dataSnapshot.getRef().setValue(model);
+
+                }
+
+//                    if (model.getId_sender().equals(id) && model.getId_receiver()
+//                            .equals(Constants.DOMAIN_NAME)) {
+//                        dataSnapshot.getRef().child("status").setValue("Seen");
+//                    }
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void updateChildren(DatabaseReference key, MessageModel model) {
+        model.setStatus("Seen");
+        key.setValue(model);
+        Log.e("Updated", "Updated at: " + key.getKey());
     }
 
     private void addNewMessage(ArrayList<SaverModel> arrayList, ArrayList<MessageModel> messages, ChatMessagesAdapter chatMessagesAdapter, SaverModel saverModel) {
@@ -362,10 +471,17 @@ public class ChatFragment extends Fragment {
         mm.setView_type(saverModel.getMap().get("view_type"));
         mm.setMessage_type(saverModel.getMap().get("message_type"));
         mm.setSent_time(saverModel.getMap().get("sent_time"));
+        mm.setId_sender(saverModel.getMap().get("id_sender"));
+        mm.setId_receiver(saverModel.getMap().get("id_receiver"));
+        mm.setStatus(saverModel.getMap().get("status"));
         messages.add(mm);
         chatMessagesAdapter.notifyDataSetChanged();
         recyclerView.scrollToPosition(chatMessagesAdapter.getItemCount() - 1);
     }
 
-
+    @Override
+    public void onPause() {
+        super.onPause();
+        markSeenRef.removeEventListener(seenEventListener);
+    }
 }

@@ -12,14 +12,19 @@ public class MessageModel {
     String message;
     String is_admin;
     String id;
-   public String sent_time;
-   public String message_type;
+    public String sent_time;
+    public String message_type;
+    public String id_sender;
+    public String id_receiver;
+    public String status;
 
 
     public MessageModel() {
     }
 
-    public MessageModel(String email, String view_type, String message, String is_admin, String id, String sent_time, String message_type) {
+    public MessageModel(String email, String view_type, String message,
+                        String is_admin, String id, String sent_time, String message_type,
+                        String id_sender, String id_receiver, String status) {
         this.email = email;
         this.view_type = view_type;
         this.message = message;
@@ -27,8 +32,34 @@ public class MessageModel {
         this.id = id;
         this.sent_time = sent_time;
         this.message_type = message_type;
+        this.id_sender = id_sender;
+        this.id_receiver = id_receiver;
+        this.status = status;
     }
 
+    public String getId_sender() {
+        return id_sender;
+    }
+
+    public void setId_sender(String id_sender) {
+        this.id_sender = id_sender;
+    }
+
+    public String getId_receiver() {
+        return id_receiver;
+    }
+
+    public void setId_receiver(String id_receiver) {
+        this.id_receiver = id_receiver;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public String getMessage_type() {
         return message_type;

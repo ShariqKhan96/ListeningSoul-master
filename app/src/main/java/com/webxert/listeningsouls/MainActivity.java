@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,10 +19,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -32,10 +35,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.webxert.listeningsouls.adapters.UserChatMessageAdapter;
+import com.webxert.listeningsouls.common.Common;
 import com.webxert.listeningsouls.common.Constants;
 import com.webxert.listeningsouls.fragments.UserChatFragment;
+import com.webxert.listeningsouls.interfaces.LogoutListener;
 import com.webxert.listeningsouls.models.ChatModel;
 import com.webxert.listeningsouls.models.MessageModel;
 import com.webxert.listeningsouls.models.SaverModel;
@@ -47,7 +53,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+import io.paperdb.Paper;
+
+public class MainActivity extends AppCompatActivity implements LogoutListener {
 
 
     ArrayList<SaverModel> arrayList = new ArrayList<>();
@@ -67,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
     ValueEventListener seenListener;
     DatabaseReference seenReference;
+    DatabaseReference markSeenRef;
 
 
     @Override
@@ -91,8 +100,68 @@ public class MainActivity extends AppCompatActivity {
             return false;
         } else if (R.id.assign_to == item.getItemId())
             return false;
+        else if (R.id.convo_status == item.getItemId())
+            return false;
+        else if (R.id.login == item.getItemId()) {
+            showStatusDialog();
+            return false;
+        }
 
         return true;
+    }
+
+    private void showStatusDialog() {
+        View view = getLayoutInflater().inflate(R.layout.convo_details, null);
+        final TextView by = view.findViewById(R.id.by);
+        final TextView sentHeadingTxt = view.findViewById(R.id.sent_by_dummy);
+        final TextView seenTxt = view.findViewById(R.id.seen_text);
+        final Button dismiss = view.findViewById(R.id.dismiss);
+        by.setVisibility(View.GONE);
+        sentHeadingTxt.setVisibility(View.GONE);
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setView(view);
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dismiss.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        DatabaseReference seenReference = FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(Constants.DOMAIN_NAME);
+        Query query = seenReference.limitToLast(1);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getChildrenCount() > 0) {
+                    MessageModel model = dataSnapshot.getChildren().iterator().next().getValue(MessageModel.class);
+                    if (model.getId_sender().equals(Constants.DOMAIN_NAME) && model.getId_receiver()
+                            .equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                        //by.setText("Admin: -> " + Common.getPersonName(dataSnapshot.child("id").getValue().toString()));
+                        seenTxt.setText("You have no pending messages!");
+                        //seenTxt.setText(dataSnapshot.child("status").getValue().toString());
+                    } else if (model.getId_sender().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()) && model.getId_receiver()
+                            .equals(Constants.DOMAIN_NAME)) {
+                        seenTxt.setText(model.getStatus());
+                    }
+
+                } else
+                    seenTxt.setText("No messages!");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("MessageStatus", databaseError.getMessage());
+                dialog.dismiss();
+            }
+        });
+    }
+
+    private void updateChildren(DatabaseReference key, MessageModel model) {
+        model.setStatus("Seen");
+        key.setValue(model);
+        Log.e("Updated", "Updated at " + key.getKey());
     }
 
     @Override
@@ -140,7 +209,8 @@ public class MainActivity extends AppCompatActivity {
                         message_text.setText("");
                         FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                 .child(Constants.DOMAIN_NAME).push().
-                                setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", message, "0", FirebaseAuth.getInstance().getCurrentUser().getUid(), simpleDateFormat.format(Calendar.getInstance().getTime()), "text")).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", message, "0", FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                        simpleDateFormat.format(Calendar.getInstance().getTime()), "text", FirebaseAuth.getInstance().getCurrentUser().getUid(), Constants.DOMAIN_NAME, "Not Seen")).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 message_text.requestFocus();
@@ -152,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
                                 Log.e("date", date.toString());
                                 model.setDate(date);
                                 model.setTimestamp(-1 * new Date().getTime());
-                                model.setAssignedTo("None");
+                                model.setAssignedTo(Paper.book().read("assign_id", "None"));
                                 model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
                                 FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                         .setValue(model);
@@ -173,7 +243,6 @@ public class MainActivity extends AppCompatActivity {
             displayMessages();
 
 
-
         } else {
             FrameLayout placeholder = findViewById(R.id.placeholder_layout);
             placeholder.setVisibility(View.VISIBLE);
@@ -183,18 +252,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     private void setFragment(FrameLayout admin_layout) {
+        UserChatFragment userChatFragment = new UserChatFragment();
+        userChatFragment.setLogoutListener(this);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.add(R.id.admin_layout, new UserChatFragment(), "userschat");
+        transaction.add(R.id.admin_layout, userChatFragment, "userschat");
         transaction.commit();
     }
 
 
     private void displayMessages() {
 
-       // setLogReference();
-       // markStatusToSeen();
+        // setLogReference();
+        markStatusToSeen();
         final ProgressDialog dialog = Utils.getMessageProgressDialog(this);
         dialog.show();
 
@@ -277,18 +347,57 @@ public class MainActivity extends AppCompatActivity {
         mm.setView_type(saverModel.getMap().get("view_type"));
         mm.setMessage_type(saverModel.getMap().get("message_type"));
         mm.setSent_time(saverModel.getMap().get("sent_time"));
+        mm.setId_sender(saverModel.getMap().get("id_sender"));
+        mm.setId_receiver(saverModel.getMap().get("id_receiver"));
+        mm.setStatus(saverModel.getMap().get("status"));
         messages.add(mm);
         chatMessagesAdapter.notifyDataSetChanged();
         user_recyclerview.scrollToPosition(chatMessagesAdapter.getItemCount() - 1);
     }
+
+    ValueEventListener seenEventListener;
+
     private void markStatusToSeen() {
-        seenReference = FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        seenReference.child("seen").setValue(true);
+//        seenReference = FirebaseDatabase.getInstance().getReference("chats").child(id);
+//        seenReference.child("seen").setValue(true);
+        markSeenRef = FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(Constants.DOMAIN_NAME);
+        Query query = markSeenRef.limitToLast(1);
+        seenEventListener = query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getChildrenCount() > 0) {
+                    MessageModel model = dataSnapshot.getChildren().iterator().next().getValue(MessageModel.class);
+                    Log.e("DataKey", dataSnapshot.getChildren().iterator().next().getKey());
+                    Log.e("SenderReceiver", model.getId_sender() + " " + model.getId_receiver());
+                    Log.e("fuserid", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    if (model.getId_sender().equals(Constants.DOMAIN_NAME) && model.getId_receiver().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()))
+                        updateChildren(dataSnapshot.getChildren().iterator().next().getRef(), model);
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        if (markSeenRef != null && seenEventListener != null)
+            markSeenRef.removeEventListener(seenEventListener);
 
+    }
+
+    @Override
+    public void onLogout() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).edit().clear().apply();
+        FirebaseAuth.getInstance().signOut();
+        startActivity(intent);
     }
 }

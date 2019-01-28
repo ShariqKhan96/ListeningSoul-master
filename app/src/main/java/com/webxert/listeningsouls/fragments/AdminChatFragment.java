@@ -13,6 +13,9 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -33,6 +36,7 @@ import com.webxert.listeningsouls.adapters.AdminChatAdapter;
 import com.webxert.listeningsouls.adapters.ChatMessagesAdapter;
 import com.webxert.listeningsouls.adapters.UserChatMessageAdapter;
 import com.webxert.listeningsouls.common.Constants;
+import com.webxert.listeningsouls.interfaces.LogoutListener;
 import com.webxert.listeningsouls.models.ChatModel;
 import com.webxert.listeningsouls.models.MessageModel;
 import com.webxert.listeningsouls.models.SaverModel;
@@ -60,11 +64,34 @@ public class AdminChatFragment extends Fragment {
     boolean messages_found = false;
     ArrayList<SaverModel> arrayList = new ArrayList<>();
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
+    LogoutListener logoutListener;
 
     public AdminChatFragment() {
         // Required empty public constructor
     }
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.admin_chat_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (R.id.logout == item.getItemId()) {
+            logoutListener.onLogout();
+            return true;
+        }
+        return true;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -90,7 +117,8 @@ public class AdminChatFragment extends Fragment {
                     String message = message_text.getText().toString();
                     message_text.setText("");
                     FirebaseDatabase.getInstance().getReference("AdminMessages").push().
-                            setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "1", message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid(), simpleDateFormat.format(Calendar.getInstance().getTime()), "text")).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "1", message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                    simpleDateFormat.format(Calendar.getInstance().getTime()), "text", Constants.DOMAIN_NAME, Constants.DOMAIN_NAME, "Not Seen")).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
 
@@ -195,9 +223,15 @@ public class AdminChatFragment extends Fragment {
         mm.setView_type(saverModel.getMap().get("view_type"));
         mm.setMessage_type(saverModel.getMap().get("message_type"));
         mm.setSent_time(saverModel.getMap().get("sent_time"));
+        mm.setId_sender(saverModel.getMap().get("id_sender"));
+        mm.setId_receiver(saverModel.getMap().get("id_receiver"));
+        mm.setStatus(saverModel.getMap().get("status"));
         messages.add(mm);
         adminChatAdapter.notifyDataSetChanged();
         messageRV.scrollToPosition(adminChatAdapter.getItemCount() - 1);
     }
 
+    public void setLogoutListener(LogoutListener logoutListener) {
+        this.logoutListener = logoutListener;
+    }
 }

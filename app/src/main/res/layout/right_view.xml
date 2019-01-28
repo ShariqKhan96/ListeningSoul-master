@@ -61,15 +61,6 @@
             android:text="Message"
            android:textColor="@android:color/black"
             android:textSize="18sp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/message_seen"
-            android:text="seen"
-            android:visibility="gone"
-            android:layout_alignParentEnd="true"
-            android:layout_below="@+id/message"
-            />
     </RelativeLayout>
 
 

@@ -106,6 +106,7 @@ public class LoginActivity extends AppCompatActivity implements RemoveCallBackLi
                         Button yes = view.findViewById(R.id.yes);
                         Button no = view.findViewById(R.id.no);
                         final EditText edtAuth = view.findViewById(R.id.edtAuth);
+                        edtAuth.setText(Constants.DOMAIN_NAME);
 
                         final AlertDialog alertDialog = dialog.show();
                         yes.setOnClickListener(new View.OnClickListener() {
