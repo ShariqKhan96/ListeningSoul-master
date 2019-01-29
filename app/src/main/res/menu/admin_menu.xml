@@ -15,8 +15,11 @@
 
     </item>
     <item
+        android:id="@+id/block_user"
+        android:title="Block this user" />
+    <item
         android:id="@+id/logout"
-        android:orderInCategory="400"
+        android:orderInCategory="500"
         android:title="Logout">
 
     </item>

@@ -11,18 +11,28 @@ public class User {
     public String password;
     public String ph_no;
     public boolean is_admin;
+    public boolean blocked;
 
 
-    public User(String id, String email, String name, String password, String ph_no, boolean is_admin) {
+    public User(String id, String email, String name, String password, String ph_no, boolean is_admin, boolean blocked) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.password = password;
         this.ph_no = ph_no;
         this.is_admin = is_admin;
+        this.blocked = blocked;
     }
 
     public User() {
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 
     public String getId() {

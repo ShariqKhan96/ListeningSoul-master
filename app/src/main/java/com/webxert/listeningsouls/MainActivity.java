@@ -207,35 +207,47 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
                     if (!TextUtils.isEmpty(message_text.getText().toString())) {
                         String message = message_text.getText().toString();
                         message_text.setText("");
-                        FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                .child(Constants.DOMAIN_NAME).push().
-                                setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", message, "0", FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                        simpleDateFormat.format(Calendar.getInstance().getTime()), "text", FirebaseAuth.getInstance().getCurrentUser().getUid(), Constants.DOMAIN_NAME, "Not Seen")).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                message_text.requestFocus();
+                        if (Common.checkBlockStatus(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                            FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                    .child(Constants.DOMAIN_NAME).push().
+                                    setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", message, "0", FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                            simpleDateFormat.format(Calendar.getInstance().getTime()), "text", FirebaseAuth.getInstance().getCurrentUser().getUid(), Constants.DOMAIN_NAME, "Not Seen")).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    message_text.requestFocus();
 
-                                ChatModel model = new ChatModel();
-                                model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                model.setSeen(false);
-                                Date date = Calendar.getInstance().getTime();
-                                Log.e("date", date.toString());
-                                model.setDate(date);
-                                model.setTimestamp(-1 * new Date().getTime());
-                                model.setAssignedTo(Paper.book().read("assign_id", "None"));
-                                model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
-                                FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                        .setValue(model);
-                                displayMessages();
+                                    ChatModel model = new ChatModel();
+                                    model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                    model.setSeen(false);
+                                    Date date = Calendar.getInstance().getTime();
+                                    Log.e("date", date.toString());
+                                    model.setDate(date);
+                                    model.setTimestamp(-1 * new Date().getTime());
+                                    model.setAssignedTo(Paper.book().read("assign_id", "None"));
+                                    model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
+                                    FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                            .setValue(model);
+                                    displayMessages();
 
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e(MainActivity.class.getSimpleName(), e.getMessage());
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.e(MainActivity.class.getSimpleName(), e.getMessage());
+                                    Toast.makeText(MainActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
 
-                            }
-                        });
+                                }
+                            });
+                        } else {
+                            TextView blockedTV = findViewById(R.id.blocked_message);
+                            blockedTV.setVisibility(View.VISIBLE);
+                            submit_button.setVisibility(View.GONE);
+                            message_text.setVisibility(View.GONE);
+                            Log.e("Blocked", FirebaseAuth.getInstance().getCurrentUser().getUid());
+//                                Toast.makeText(MainActivity.this, "You are blocked by admins!", Toast.LENGTH_SHORT).show();
+
+                        }
+
                     }
                 }
             });

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    app:cardBackgroundColor="@color/foreground"
+    app:cardCornerRadius="2dp"
+    app:cardElevation="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_margin="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Assign To:"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_marginStart="5dp"
+            android:id="@+id/assign_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="None"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+
+            />
+
+        <TextView
+            android:layout_margin="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Block Status:"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_marginStart="5dp"
+            android:id="@+id/block_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Not Blocked"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+
+            />
+
+        <TextView
+            android:layout_margin="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Messages Count:"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_marginStart="5dp"
+            android:id="@+id/message_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No Messages"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+
+            />
+        <Button
+            android:id="@+id/dismiss"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="end"
+            android:textColor="@android:color/black"
+            android:text="Dismiss"
+            android:textAllCaps="false"
+            android:background="@drawable/button_layout"
+            />
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

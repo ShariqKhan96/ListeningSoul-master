@@ -37,6 +37,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.webxert.listeningsouls.MainActivity;
 import com.webxert.listeningsouls.R;
+import com.webxert.listeningsouls.RegisterActivity;
 import com.webxert.listeningsouls.adapters.ChatMessagesAdapter;
 import com.webxert.listeningsouls.common.Common;
 import com.webxert.listeningsouls.common.Constants;
@@ -44,6 +45,7 @@ import com.webxert.listeningsouls.interfaces.LogoutListener;
 import com.webxert.listeningsouls.models.ChatModel;
 import com.webxert.listeningsouls.models.MessageModel;
 import com.webxert.listeningsouls.models.SaverModel;
+import com.webxert.listeningsouls.models.User;
 
 import org.w3c.dom.Text;
 
@@ -80,6 +82,7 @@ public class ChatFragment extends Fragment {
     public RecyclerView recyclerView;
 
     ImageView submit_button;
+    TextView blockedTV;
     EditText message_text;
     String id;
     String email;
@@ -114,10 +117,75 @@ public class ChatFragment extends Fragment {
             showConversationStatusDalog();
         else if (R.id.logout == item.getItemId())
             logout();
+        else if (R.id.block_user == item.getItemId())
+            showBlockDialog();
 
         return true;
 
 
+    }
+
+    private void showBlockDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        View view = getLayoutInflater().inflate(R.layout.block_dialog, null);
+        builder.setView(view);
+        Button yes = view.findViewById(R.id.yes);
+        Button cancel = view.findViewById(R.id.dismiss);
+
+        final AlertDialog dialog = builder.show();
+        yes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                blockUser(id);
+            }
+        });
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+    }
+
+    private void blockUser(String id) {
+        FirebaseDatabase.getInstance().getReference("Users").child(id).child("blocked").setValue(true);
+        hideMediaLayout();
+        getAllUsers();
+    }
+
+
+    private void getAllUsers() {
+
+        Paper.book().delete("users");
+        Constants.userList.clear();
+        final DatabaseReference db_ref = FirebaseDatabase.getInstance().getReference("Users");
+
+        db_ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    Constants.userList.add(data.getValue(User.class));
+                }
+                Paper.book().write("users", Constants.userList);
+                db_ref.removeEventListener(this);
+                //db_ref.removeEventListener(this); can also simply do like this
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getContext(), "" + databaseError.getMessage(), Toast.LENGTH_LONG).show();
+
+            }
+        });
+
+
+    }
+
+    private void hideMediaLayout() {
+        submit_button.setVisibility(View.GONE);
+        message_text.setVisibility(View.GONE);
+        blockedTV.setVisibility(View.VISIBLE);
     }
 
     private void logout() {
@@ -289,7 +357,7 @@ public class ChatFragment extends Fragment {
                 // Toast.makeText(getContext(), "Position: " + which + " Value: " + usersName[which], Toast.LENGTH_LONG).show();
                 String assignedUserId = usersIds[which];
                 updateAssignedId(assignedUserId);
-               Paper.book().write("assign_id", assignedUserId);
+                Paper.book().write("assign_id", assignedUserId);
                 dialog.dismiss();
             }
         });
@@ -309,6 +377,7 @@ public class ChatFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
         recyclerView = view.findViewById(R.id.user_message_list);
         submit_button = view.findViewById(R.id.submit_button);
+        blockedTV = view.findViewById(R.id.blocked_message);
         message_text = view.findViewById(R.id.message_text);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setStackFromEnd(true);
@@ -330,25 +399,30 @@ public class ChatFragment extends Fragment {
                 if (!TextUtils.isEmpty(message_text.getText().toString())) {
                     String message = message_text.getText().toString();
                     message_text.setText("");
-                    FirebaseDatabase.getInstance().getReference("Messages").child(id)
-                            .child(Constants.DOMAIN_NAME).push().setValue
-                            (new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "1",
-                                    message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                    simpleDateFormat.format(Calendar.getInstance().getTime()), "text", Constants.DOMAIN_NAME, id, "Not Seen")).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            //message_text.setText("");
-                            message_text.requestFocus();
+                    if (Common.checkBlockStatus(id)) {
+                        FirebaseDatabase.getInstance().getReference("Messages").child(id)
+                                .child(Constants.DOMAIN_NAME).push().setValue
+                                (new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "1",
+                                        message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                        simpleDateFormat.format(Calendar.getInstance().getTime()), "text", Constants.DOMAIN_NAME, id, "Not Seen")).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                //message_text.setText("");
+                                message_text.requestFocus();
 
-                            displayMessages();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(MainActivity.class.getSimpleName(), e.getMessage());
+                                displayMessages();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e(MainActivity.class.getSimpleName(), e.getMessage());
 
-                        }
-                    });
+                            }
+                        });
+                    } else {
+                        hideMediaLayout();
+                    }
+
                 }
             }
         });

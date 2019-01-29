@@ -3,11 +3,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <ImageView
+        android:id="@+id/details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:paddingBottom="10dp"
+        android:paddingLeft="7dp"
+        android:paddingTop="10dp"
+        android:src="@drawable/ic_more_vert_black_24dp" />
+
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/profile_image"
         android:layout_width="45dp"
-        android:layout_centerVertical="true"
         android:layout_height="50dp"
+        android:layout_centerVertical="true"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="3dp"
         android:background="@drawable/circle_shape">
@@ -42,10 +53,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/message_seen"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="10dp"
+        android:layout_toLeftOf="@+id/details"
         android:text="date"
-
         android:textColor="@android:color/black"
         android:visibility="visible" />
 
@@ -53,32 +62,33 @@
         android:id="@+id/message_seen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-       android:layout_below="@+id/chat_with"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="10dp"
+        android:layout_below="@+id/chat_with"
+
+        android:layout_toLeftOf="@+id/details"
         android:text="Unread message(s)"
         android:textColor="@android:color/holo_red_dark"
         android:textStyle="bold"
         android:visibility="visible" />
+
     <TextView
         android:id="@+id/assign_to"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/message_seen"
-        android:layout_marginStart="10dp"
-        android:textSize="16sp"
         android:layout_centerHorizontal="true"
-
+        android:layout_marginStart="10dp"
         android:text="Assigned To: None"
+
         android:textColor="@color/colorAccent"
+        android:textSize="16sp"
         android:textStyle="bold"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_below="@+id/assign_to"
+        android:layout_below="@+id/profile_image"
         android:layout_marginStart="5dp"
         android:layout_marginEnd="5dp"
         android:background="@android:color/darker_gray" />

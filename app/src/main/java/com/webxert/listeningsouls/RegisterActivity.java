@@ -93,7 +93,7 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
                                         public void onSuccess(AuthResult authResult) {
 
                                             alertDialog.dismiss();
-                                            User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", true);
+                                            User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", true, false);
                                             writer.putString(Constants.AUTH_, Constants.Authentication.ADMIN.name());
                                             writer.putBoolean(Constants.LOGIN_, true);
                                             writer.putString(Constants.USER_EMAIL, email.getText().toString());
@@ -160,7 +160,7 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
                                 writer.apply();
 
 
-                                User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", is_adm);
+                                User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", is_adm, false);
                                 db_ref.child(authResult.getUser().getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {

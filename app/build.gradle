@@ -33,6 +33,7 @@ dependencies {
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.github.tylersuehr7:bubble-layout:1.0'
     implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.github.GrenderG:Toasty:1.4.0'
 
     implementation 'com.github.lguipeng:BubbleView:1.0.1'
 

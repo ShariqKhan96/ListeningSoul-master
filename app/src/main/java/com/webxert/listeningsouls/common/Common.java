@@ -22,4 +22,17 @@ public class Common {
         return "Anonymous";
     }
 
+    public static boolean checkBlockStatus(String id) {
+        List<User> users = new ArrayList<>();
+        users.addAll(Paper.book().read("users", new ArrayList<User>()));
+
+        for (User user : users) {
+            if (user.getId().equals(id)) {
+                if (user.isBlocked())
+                    return true;
+            }
+        }
+        return false;
+    }
+
 }

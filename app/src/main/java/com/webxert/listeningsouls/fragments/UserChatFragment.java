@@ -1,8 +1,10 @@
 package com.webxert.listeningsouls.fragments;
 
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -18,14 +20,20 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.webxert.listeningsouls.MainActivity;
 import com.webxert.listeningsouls.R;
 import com.webxert.listeningsouls.common.Common;
@@ -49,6 +57,7 @@ public class UserChatFragment extends Fragment {
 
     public static UserChatFragment instance;
     RecyclerView recyclerView;
+    ImageView details;
     FirebaseRecyclerAdapter<ChatModel, ChatViewHolder> adapter;
     int count = 0;
     ProgressDialog dialog;
@@ -97,6 +106,7 @@ public class UserChatFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_user_chat, container, false);
         chat_admin_layout = view.findViewById(R.id.chat_admin_layout);
+
         chat_admin_layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -162,10 +172,16 @@ public class UserChatFragment extends Fragment {
                     holder.seenMessages.setVisibility(View.VISIBLE);
                 else holder.seenMessages.setVisibility(View.INVISIBLE);
 
-                if (model.getAssignedTo().equals("None"))
-                    holder.assignedTo.setText(new StringBuilder("Assigned To: None"));
-                else
-                    holder.assignedTo.setText(new StringBuilder("Assigned To: ").append(Common.getPersonName(model.getAssignedTo())));
+                holder.details.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showDetailsDialog(model);
+                    }
+                });
+//                if (model.getAssignedTo().equals("None"))
+//                    holder.assignedTo.setText(new StringBuilder("Assigned To: None"));
+//                else
+//                    holder.assignedTo.setText(new StringBuilder("Assigned To: ").append(Common.getPersonName(model.getAssignedTo())));
 
 
                 //avatar imageview
@@ -188,6 +204,49 @@ public class UserChatFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
 
+    }
+
+    private void showDetailsDialog(ChatModel model) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+        View view = getLayoutInflater().inflate(R.layout.details_dialog, null);
+        builder.setView(view);
+        final AlertDialog dialog = builder.show();
+        final TextView messageCount, assignTo, blockStatus;
+        Button dismiss;
+
+        assignTo = view.findViewById(R.id.assign_to);
+        dismiss = view.findViewById(R.id.dismiss);
+        blockStatus = view.findViewById(R.id.block_status);
+        messageCount = view.findViewById(R.id.message_count);
+
+        assignTo.setText(Common.getPersonName(model.getAssignedTo()));
+        if (Common.checkBlockStatus(model.getId())) {
+            blockStatus.setTextColor(Color.RED);
+            blockStatus.setText("Blocked");
+        } else {
+            blockStatus.setTextColor(Color.GREEN);
+            blockStatus.setText("Not Blocked");
+        }
+        dismiss.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+
+        FirebaseDatabase.getInstance().getReference("Messages").child(model.getId()).child(Constants.DOMAIN_NAME).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                messageCount.setText(dataSnapshot.getChildrenCount() + "");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void openChatFragment(String id, String email) {
