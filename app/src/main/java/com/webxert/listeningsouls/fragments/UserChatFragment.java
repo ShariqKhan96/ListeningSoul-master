@@ -220,12 +220,14 @@ public class UserChatFragment extends Fragment {
         blockStatus = view.findViewById(R.id.block_status);
         messageCount = view.findViewById(R.id.message_count);
 
-        assignTo.setText(Common.getPersonName(model.getAssignedTo()));
+        if (model.getAssignedTo().equals("None")) assignTo.setText("None");
+        else
+            assignTo.setText(Common.getPersonName(model.getAssignedTo()));
         if (Common.checkBlockStatus(model.getId())) {
-            blockStatus.setTextColor(Color.RED);
+            blockStatus.setTextColor(getResources().getColor(R.color.errorColor));
             blockStatus.setText("Blocked");
         } else {
-            blockStatus.setTextColor(Color.GREEN);
+            blockStatus.setTextColor(getResources().getColor(R.color.successColor));
             blockStatus.setText("Not Blocked");
         }
         dismiss.setOnClickListener(new View.OnClickListener() {

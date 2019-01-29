@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -70,6 +71,7 @@ public class ChatFragment extends Fragment {
     final DatabaseReference logRef = FirebaseDatabase.getInstance().getReference("Logs");
     LogoutListener logoutListener;
     DatabaseReference markSeenRef;
+    View view;
 
     public ChatFragment() {
 
@@ -126,13 +128,24 @@ public class ChatFragment extends Fragment {
     }
 
     private void showBlockDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         View view = getLayoutInflater().inflate(R.layout.block_dialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setView(view);
+        final AlertDialog dialog = builder.create();
+        dialog.show();
         Button yes = view.findViewById(R.id.yes);
         Button cancel = view.findViewById(R.id.dismiss);
+        Button unblock = view.findViewById(R.id.unblock);
 
-        final AlertDialog dialog = builder.show();
+        if (Common.checkBlockStatus(id)) {
+            unblock.setEnabled(true);
+            yes.setEnabled(false);
+        } else {
+            yes.setEnabled(true);
+            unblock.setEnabled(false);
+        }
+
+
         yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -146,6 +159,28 @@ public class ChatFragment extends Fragment {
                 dialog.dismiss();
             }
         });
+        unblock.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                unblockUser(id);
+                dialog.dismiss();
+            }
+        });
+    }
+
+    private void unblockUser(String id) {
+        FirebaseDatabase.getInstance().getReference("Users").child(id).child("blocked").setValue(false);
+        showMediaLayout();
+        getAllUsers();
+    }
+
+    private void showMediaLayout() {
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.ABOVE, R.id.message_text);
+        recyclerView.setLayoutParams(params);
+        submit_button.setVisibility(View.VISIBLE);
+        message_text.setVisibility(View.VISIBLE);
+        blockedTV.setVisibility(View.GONE);
     }
 
     private void blockUser(String id) {
@@ -183,6 +218,12 @@ public class ChatFragment extends Fragment {
     }
 
     private void hideMediaLayout() {
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT
+        );
+        params.setMargins(0, 0, 0, 35);
+        recyclerView.setLayoutParams(params);
         submit_button.setVisibility(View.GONE);
         message_text.setVisibility(View.GONE);
         blockedTV.setVisibility(View.VISIBLE);
@@ -374,7 +415,7 @@ public class ChatFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_chat, container, false);
+        view = inflater.inflate(R.layout.fragment_chat, container, false);
         recyclerView = view.findViewById(R.id.user_message_list);
         submit_button = view.findViewById(R.id.submit_button);
         blockedTV = view.findViewById(R.id.blocked_message);
@@ -391,6 +432,8 @@ public class ChatFragment extends Fragment {
 
 
         // displayMessages();
+        if (Common.checkBlockStatus(id))
+            hideMediaLayout();
 
         submit_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -399,7 +442,7 @@ public class ChatFragment extends Fragment {
                 if (!TextUtils.isEmpty(message_text.getText().toString())) {
                     String message = message_text.getText().toString();
                     message_text.setText("");
-                    if (Common.checkBlockStatus(id)) {
+                    if (!Common.checkBlockStatus(id)) {
                         FirebaseDatabase.getInstance().getReference("Messages").child(id)
                                 .child(Constants.DOMAIN_NAME).push().setValue
                                 (new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "1",

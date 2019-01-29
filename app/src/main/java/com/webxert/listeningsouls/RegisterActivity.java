@@ -202,15 +202,20 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
     private void getAllUsers() {
 
         Paper.book().delete("users");
+        Paper.book().delete("admins");
         Constants.userList.clear();
+        Constants.adminList.clear();
 
         valueEventListener = db_ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     Constants.userList.add(data.getValue(User.class));
+                    if (data.child("is_admin").getValue().toString().equals("true"))
+                        Constants.adminList.add(data.getValue(User.class));
                 }
                 Paper.book().write("users", Constants.userList);
+                Paper.book().write("admins", Constants.adminList);
                 removeCallBackListener.onRemoveCallBack();
                 //db_ref.removeEventListener(this); can also simply do like this
             }

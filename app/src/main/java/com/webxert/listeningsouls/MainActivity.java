@@ -105,7 +105,8 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
         else if (R.id.login == item.getItemId()) {
             showStatusDialog();
             return false;
-        }
+        } else if (R.id.block_user == item.getItemId())
+            return false;
 
         return true;
     }
@@ -164,6 +165,27 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
         Log.e("Updated", "Updated at " + key.getKey());
     }
 
+    public void showMediaLayout() {
+        TextView blockedTV = findViewById(R.id.blocked_message);
+        blockedTV.setVisibility(View.GONE);
+        submit_button.setVisibility(View.VISIBLE);
+        message_text.setVisibility(View.VISIBLE);
+    }
+
+    public void hideMediaLayout() {
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT
+        );
+        params.setMargins(0, 0, 0, 35);
+        user_recyclerview.setLayoutParams(params);
+        TextView blockedTV = findViewById(R.id.blocked_message);
+        blockedTV.setVisibility(View.VISIBLE);
+        submit_button.setVisibility(View.GONE);
+        message_text.setVisibility(View.GONE);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -198,16 +220,23 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
             user_recyclerview.setLayoutManager(layoutManager);
             chatMessagesAdapter = new UserChatMessageAdapter(messages, this);
             user_recyclerview.setAdapter(chatMessagesAdapter);
+            if (Common.checkBlockStatus(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                hideMediaLayout();
+            } else {
+                showMediaLayout();
+//                                Toast.makeText(MainActivity.this, "You are blocked by admins!", Toast.LENGTH_SHORT).show();
 
-
+            }
             submit_button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    if (!TextUtils.isEmpty(message_text.getText().toString())) {
-                        String message = message_text.getText().toString();
-                        message_text.setText("");
-                        if (Common.checkBlockStatus(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+
+                    if (!Common.checkBlockStatus(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                        if (!TextUtils.isEmpty(message_text.getText().toString())) {
+                            String message = message_text.getText().toString();
+                            message_text.setText("");
+
                             FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                     .child(Constants.DOMAIN_NAME).push().
                                     setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", message, "0", FirebaseAuth.getInstance().getCurrentUser().getUid(),
@@ -238,16 +267,13 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
 
                                 }
                             });
-                        } else {
-                            TextView blockedTV = findViewById(R.id.blocked_message);
-                            blockedTV.setVisibility(View.VISIBLE);
-                            submit_button.setVisibility(View.GONE);
-                            message_text.setVisibility(View.GONE);
-                            Log.e("Blocked", FirebaseAuth.getInstance().getCurrentUser().getUid());
-//                                Toast.makeText(MainActivity.this, "You are blocked by admins!", Toast.LENGTH_SHORT).show();
+
 
                         }
 
+                    } else {
+                        Log.e("Here", "Why here");
+                        hideMediaLayout();
                     }
                 }
             });
