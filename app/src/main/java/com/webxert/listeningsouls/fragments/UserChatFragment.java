@@ -34,6 +34,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.webxert.listeningsouls.ChatActivity;
 import com.webxert.listeningsouls.MainActivity;
 import com.webxert.listeningsouls.R;
 import com.webxert.listeningsouls.common.Common;
@@ -259,18 +260,24 @@ public class UserChatFragment extends Fragment {
 
     private void openChatFragment(String id, String email) {
 
-        Bundle bundle = new Bundle();
-        bundle.putString("id", id);
-        bundle.putString("email", email);
+        Intent intent = new Intent(getContext(), ChatActivity.class);
+        intent.putExtra("id", id);
+        intent.putExtra("email", email);
+        startActivity(intent);
 
-        ChatFragment chatFragment = new ChatFragment();
-        chatFragment.setLogoutListener(logoutListener);
-        chatFragment.setUserIdentityListener(userIdentityListener);
-        chatFragment.setArguments(bundle);
-        getActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.admin_layout, chatFragment)
-                .addToBackStack(null)
-                .commit();
+
+//        Bundle bundle = new Bundle();
+//        bundle.putString("id", id);
+//        bundle.putString("email", email);
+//
+//        ChatFragment chatFragment = new ChatFragment();
+//        chatFragment.setLogoutListener(logoutListener);
+//        chatFragment.setUserIdentityListener(userIdentityListener);
+//        chatFragment.setArguments(bundle);
+//        getActivity().getSupportFragmentManager().beginTransaction()
+//                .replace(R.id.admin_layout, chatFragment)
+//                .addToBackStack(null)
+//                .commit();
     }
 
     @Override

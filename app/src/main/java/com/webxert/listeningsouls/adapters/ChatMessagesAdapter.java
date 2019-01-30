@@ -22,6 +22,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
+import com.webxert.listeningsouls.MyGlideProvider;
 import com.webxert.listeningsouls.R;
 import com.webxert.listeningsouls.common.Constants;
 import com.webxert.listeningsouls.models.MessageModel;
@@ -80,7 +81,6 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapte
                             myVH.progressBar.setVisibility(View.GONE);
                             return false;
                         }
-
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             Log.e("onResourceReady","onResourceReady");
