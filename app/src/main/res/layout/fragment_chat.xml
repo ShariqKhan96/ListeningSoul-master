@@ -1,9 +1,8 @@
-<RelativeLayout
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/user_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:background="@color/background">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/user_message_list"
@@ -17,31 +16,41 @@
 
     <ImageView
         android:id="@+id/submit_button"
-        android:layout_width="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:padding="6dp"
+        android:src="@drawable/ic_send_black_24dp" />
+
+    <ImageView
+        android:id="@+id/select_media"
+        android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:src="@android:drawable/ic_menu_send" />
+        android:padding="6dp"
 
+        android:src="@drawable/ic_attach_file_black_24dp" />
 
     <EditText
-        android:backgroundTint="@android:color/darker_gray"
         android:id="@+id/message_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/black"
         android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/submit_button" />
+        android:layout_toLeftOf="@+id/submit_button"
+        android:layout_toRightOf="@+id/select_media"
+        android:backgroundTint="@android:color/darker_gray"
+        android:textColor="@android:color/black" />
 
     <TextView
         android:id="@+id/blocked_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:text="You can no longer reply to this conversation"
+        android:textColor="@android:color/holo_red_dark"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:textColor="@android:color/holo_red_dark"
         android:visibility="gone" />
 </RelativeLayout>

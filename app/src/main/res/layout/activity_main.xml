@@ -56,27 +56,41 @@
 
         <ImageView
             android:id="@+id/submit_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
-            android:padding="4dp"
-            android:src="@android:drawable/ic_menu_send" />
+            android:padding="6dp"
+            android:src="@drawable/ic_send_black_24dp" />
+
+        <ImageView
+            android:id="@+id/select_media"
+            android:layout_width="45dp"
+            android:layout_height="35dp"
+            android:layout_alignParentBottom="true"
+            android:paddingBottom="8dp"
+            android:paddingTop="6dp"
+            android:paddingEnd="6dp"
+            android:paddingStart="6dp"
+
+            android:src="@drawable/ic_attach_file_black_24dp"
+            />
 
         <TextView
             android:id="@+id/blocked_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-           android:layout_alignParentBottom="true"
+            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:text="You can no longer reply to this conversation"
+            android:textColor="@android:color/holo_red_dark"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@android:color/holo_red_dark"
             android:visibility="gone" />
 
 
         <EditText
+            android:layout_toRightOf="@+id/select_media"
             android:id="@+id/message_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

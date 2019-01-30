@@ -39,6 +39,7 @@ import com.webxert.listeningsouls.R;
 import com.webxert.listeningsouls.common.Common;
 import com.webxert.listeningsouls.common.Constants;
 import com.webxert.listeningsouls.interfaces.LogoutListener;
+import com.webxert.listeningsouls.interfaces.UserIdentityListener;
 import com.webxert.listeningsouls.models.ChatModel;
 import com.webxert.listeningsouls.models.User;
 import com.webxert.listeningsouls.utils.Utils;
@@ -64,6 +65,7 @@ public class UserChatFragment extends Fragment {
     boolean message_found;
     RelativeLayout chat_admin_layout;
     LogoutListener logoutListener;
+    UserIdentityListener userIdentityListener;
 
 
     public static UserChatFragment getInstance() {
@@ -78,6 +80,10 @@ public class UserChatFragment extends Fragment {
 
     public void setLogoutListener(LogoutListener logoutListener) {
         this.logoutListener = logoutListener;
+    }
+
+    public void setUserIdentityListener(UserIdentityListener userIdentityListener) {
+        this.userIdentityListener = userIdentityListener;
     }
 
     @Override
@@ -259,6 +265,7 @@ public class UserChatFragment extends Fragment {
 
         ChatFragment chatFragment = new ChatFragment();
         chatFragment.setLogoutListener(logoutListener);
+        chatFragment.setUserIdentityListener(userIdentityListener);
         chatFragment.setArguments(bundle);
         getActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.admin_layout, chatFragment)

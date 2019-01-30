@@ -118,7 +118,7 @@ public class AdminChatFragment extends Fragment {
                     message_text.setText("");
                     FirebaseDatabase.getInstance().getReference("AdminMessages").push().
                             setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "1", message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                    simpleDateFormat.format(Calendar.getInstance().getTime()), "text", Constants.DOMAIN_NAME, Constants.DOMAIN_NAME, "Not Seen")).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    simpleDateFormat.format(Calendar.getInstance().getTime()), "text", Constants.DOMAIN_NAME, Constants.DOMAIN_NAME, "Not Seen", "")).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
 

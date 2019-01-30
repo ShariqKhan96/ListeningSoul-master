@@ -3,11 +3,13 @@ package com.webxert.listeningsouls;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -27,8 +30,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -37,16 +43,21 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.webxert.listeningsouls.adapters.UserChatMessageAdapter;
 import com.webxert.listeningsouls.common.Common;
 import com.webxert.listeningsouls.common.Constants;
 import com.webxert.listeningsouls.fragments.UserChatFragment;
 import com.webxert.listeningsouls.interfaces.LogoutListener;
+import com.webxert.listeningsouls.interfaces.UserIdentityListener;
 import com.webxert.listeningsouls.models.ChatModel;
 import com.webxert.listeningsouls.models.MessageModel;
 import com.webxert.listeningsouls.models.SaverModel;
 import com.webxert.listeningsouls.utils.Utils;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,9 +66,11 @@ import java.util.Map;
 
 import io.paperdb.Paper;
 
-public class MainActivity extends AppCompatActivity implements LogoutListener {
+public class MainActivity extends AppCompatActivity implements LogoutListener, UserIdentityListener {
 
 
+    private static final int IMAGE_PICK_CODE_USER_TO_ADMIN = 0;
+    private static final int IMAGE_PICK_CODE_ADMIN_TO_USER = 1;
     ArrayList<SaverModel> arrayList = new ArrayList<>();
     ArrayList<MessageModel> messages = new ArrayList<>();
     boolean messages_found = false;
@@ -75,7 +88,10 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
     ValueEventListener seenListener;
     DatabaseReference seenReference;
+    ImageView attach_files;
     DatabaseReference markSeenRef;
+    public static String USER_ID_FROM_FRAGMENT = "";
+    public static Uri IMAGE_PICKED_ADDRESS = null;
 
 
     @Override
@@ -166,10 +182,14 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
     }
 
     public void showMediaLayout() {
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.ABOVE, R.id.message_text);
+        user_recyclerview.setLayoutParams(params);
         TextView blockedTV = findViewById(R.id.blocked_message);
         blockedTV.setVisibility(View.GONE);
         submit_button.setVisibility(View.VISIBLE);
         message_text.setVisibility(View.VISIBLE);
+        attach_files.setVisibility(View.VISIBLE);
     }
 
     public void hideMediaLayout() {
@@ -184,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
         blockedTV.setVisibility(View.VISIBLE);
         submit_button.setVisibility(View.GONE);
         message_text.setVisibility(View.GONE);
+        attach_files.setVisibility(View.GONE);
     }
 
     @Override
@@ -200,6 +221,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
         submit_button = findViewById(R.id.submit_button);
         message_text = findViewById(R.id.message_text);
         email = reader.getString(Constants.USER_EMAIL, "null");
+        attach_files = findViewById(R.id.select_media);
 
 
         layout_decider = reader.getString(Constants.AUTH_, "null");
@@ -227,6 +249,18 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
 //                                Toast.makeText(MainActivity.this, "You are blocked by admins!", Toast.LENGTH_SHORT).show();
 
             }
+
+            attach_files.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+
+                    startActivityForResult(intent, IMAGE_PICK_CODE_USER_TO_ADMIN);
+
+                }
+            });
             submit_button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -240,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
                             FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                     .child(Constants.DOMAIN_NAME).push().
                                     setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", message, "0", FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                            simpleDateFormat.format(Calendar.getInstance().getTime()), "text", FirebaseAuth.getInstance().getCurrentUser().getUid(), Constants.DOMAIN_NAME, "Not Seen")).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            simpleDateFormat.format(Calendar.getInstance().getTime()), "text", FirebaseAuth.getInstance().getCurrentUser().getUid(), Constants.DOMAIN_NAME, "Not Seen", "none")).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     message_text.requestFocus();
@@ -289,10 +323,141 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        // super.onActivityResult(requestCode, resultCode, data);
+        Log.e("RequestCode", requestCode + "");
+        if (requestCode == IMAGE_PICK_CODE_USER_TO_ADMIN && resultCode == RESULT_OK && data != null) {
+            final Uri uri = data.getData();
+            final ProgressDialog dialog = new ProgressDialog(this);
+            dialog.setTitle("Sending Media");
+            dialog.setMessage("Please Wait");
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+            sendMediaAsUser(uri, dialog);
+
+
+        } else if (requestCode == IMAGE_PICK_CODE_ADMIN_TO_USER && resultCode == RESULT_OK && data != null) {
+
+            IMAGE_PICKED_ADDRESS = data.getData();
+            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent("sending.as.admin"));
+        }
+    }
+
+    private void sendMediaAsAdmin(Uri uri, final ProgressDialog dialog) {
+        DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(Constants.DOMAIN_NAME);
+        String imageName = messageRef.push().getKey();
+        final StorageReference imagesRef = FirebaseStorage.getInstance().getReference("images").child(imageName + ".jpg");
+        UploadTask uploadTask = imagesRef.putFile(uri);
+        uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful())
+                    throw task.getException();
+                return imagesRef.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                dialog.dismiss();
+                if (task.isSuccessful()) {
+
+                    FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                            .child(Constants.DOMAIN_NAME).push().
+                            setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", "", "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                    simpleDateFormat.format(Calendar.getInstance().getTime()), "image", Constants.DOMAIN_NAME, USER_ID_FROM_FRAGMENT, "Not Seen", task.getResult().toString())).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            message_text.requestFocus();
+
+                            ChatModel model = new ChatModel();
+                            model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                            model.setSeen(false);
+                            Date date = Calendar.getInstance().getTime();
+                            Log.e("date", date.toString());
+                            model.setDate(date);
+                            model.setTimestamp(-1 * new Date().getTime());
+                            model.setAssignedTo(Paper.book().read("assign_id", "None"));
+                            model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
+                            FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                    .setValue(model);
+                            displayMessages();
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(MainActivity.class.getSimpleName(), e.getMessage());
+                            Toast.makeText(MainActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+                } else
+                    Log.e("DownloadUrlException", task.getException().getMessage());
+
+            }
+        });
+    }
+
+    private void sendMediaAsUser(Uri uri, final ProgressDialog dialog) {
+        DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(Constants.DOMAIN_NAME);
+        String imageName = messageRef.push().getKey();
+        final StorageReference imagesRef = FirebaseStorage.getInstance().getReference("images").child(imageName + ".jpg");
+        UploadTask uploadTask = imagesRef.putFile(uri);
+        uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful())
+                    throw task.getException();
+                return imagesRef.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                dialog.dismiss();
+                if (task.isSuccessful()) {
+
+                    FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                            .child(Constants.DOMAIN_NAME).push().
+                            setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", "", "0", FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                    simpleDateFormat.format(Calendar.getInstance().getTime()), "image", FirebaseAuth.getInstance().getCurrentUser().getUid(), Constants.DOMAIN_NAME, "Not Seen", task.getResult().toString())).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            message_text.requestFocus();
+
+                            ChatModel model = new ChatModel();
+                            model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                            model.setSeen(false);
+                            Date date = Calendar.getInstance().getTime();
+                            Log.e("date", date.toString());
+                            model.setDate(date);
+                            model.setTimestamp(-1 * new Date().getTime());
+                            model.setAssignedTo(Paper.book().read("assign_id", "None"));
+                            model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
+                            FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                    .setValue(model);
+                            displayMessages();
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(MainActivity.class.getSimpleName(), e.getMessage());
+                            Toast.makeText(MainActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+                } else
+                    Log.e("DownloadUrlException", task.getException().getMessage());
+
+            }
+        });
+    }
 
     private void setFragment(FrameLayout admin_layout) {
         UserChatFragment userChatFragment = new UserChatFragment();
         userChatFragment.setLogoutListener(this);
+        userChatFragment.setUserIdentityListener(this);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.admin_layout, userChatFragment, "userschat");
         transaction.commit();
@@ -388,6 +553,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
         mm.setId_sender(saverModel.getMap().get("id_sender"));
         mm.setId_receiver(saverModel.getMap().get("id_receiver"));
         mm.setStatus(saverModel.getMap().get("status"));
+        mm.setImage_url(saverModel.getMap().get("image_url"));
         messages.add(mm);
         chatMessagesAdapter.notifyDataSetChanged();
         user_recyclerview.scrollToPosition(chatMessagesAdapter.getItemCount() - 1);
@@ -437,5 +603,10 @@ public class MainActivity extends AppCompatActivity implements LogoutListener {
         getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).edit().clear().apply();
         FirebaseAuth.getInstance().signOut();
         startActivity(intent);
+    }
+
+    @Override
+    public void onRequestCodeMatched(String id) {
+        USER_ID_FROM_FRAGMENT = id;
     }
 }

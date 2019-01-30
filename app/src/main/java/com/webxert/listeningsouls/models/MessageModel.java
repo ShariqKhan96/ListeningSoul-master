@@ -17,6 +17,7 @@ public class MessageModel {
     public String id_sender;
     public String id_receiver;
     public String status;
+    public String image_url;
 
 
     public MessageModel() {
@@ -24,7 +25,7 @@ public class MessageModel {
 
     public MessageModel(String email, String view_type, String message,
                         String is_admin, String id, String sent_time, String message_type,
-                        String id_sender, String id_receiver, String status) {
+                        String id_sender, String id_receiver, String status, String image_url) {
         this.email = email;
         this.view_type = view_type;
         this.message = message;
@@ -35,6 +36,15 @@ public class MessageModel {
         this.id_sender = id_sender;
         this.id_receiver = id_receiver;
         this.status = status;
+        this.image_url = image_url;
+    }
+
+    public String getImage_url() {
+        return image_url;
+    }
+
+    public void setImage_url(String image_url) {
+        this.image_url = image_url;
     }
 
     public String getId_sender() {

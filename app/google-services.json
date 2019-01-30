@@ -1,159 +1,27 @@
 {
   "project_info": {
-    "project_number": "910383808950",
-    "firebase_url": "https://chatsnap-89258.firebaseio.com",
-    "project_id": "chatsnap-89258",
-    "storage_bucket": "chatsnap-89258.appspot.com"
+    "project_number": "445836049634",
+    "firebase_url": "https://chatnsnap-f8ace.firebaseio.com",
+    "project_id": "chatnsnap-f8ace",
+    "storage_bucket": "chatnsnap-f8ace.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:910383808950:android:ffc914ed858935a0",
+        "mobilesdk_app_id": "1:445836049634:android:ffc914ed858935a0",
         "android_client_info": {
           "package_name": "com.example.hp.foodies"
         }
       },
       "oauth_client": [
         {
-          "client_id": "910383808950-vfqdn49tq06etqduljejc1ms1skkapna.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.hp.foodies",
-            "certificate_hash": "614830b3f204a747eca6efe1a167c8a3081bd22f"
-          }
-        },
-        {
-          "client_id": "910383808950-t174vrba61tnm03pius4epkfpsiaq9ov.apps.googleusercontent.com",
+          "client_id": "445836049634-4qn9bh90i2le3gs70m09m5dsf46727i4.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDl22ltpIudLRrW70NkDWHmmhKN3jZVfvk"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "910383808950-t174vrba61tnm03pius4epkfpsiaq9ov.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:910383808950:android:ca08292c2851934c",
-        "android_client_info": {
-          "package_name": "com.example.hp.foodiesserverside"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "910383808950-cej3cp5mht0l8mf1aggsqvnpbi9f6ain.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.hp.foodiesserverside",
-            "certificate_hash": "614830b3f204a747eca6efe1a167c8a3081bd22f"
-          }
-        },
-        {
-          "client_id": "910383808950-t174vrba61tnm03pius4epkfpsiaq9ov.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDl22ltpIudLRrW70NkDWHmmhKN3jZVfvk"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "910383808950-t174vrba61tnm03pius4epkfpsiaq9ov.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:910383808950:android:9b205a2d98927dad",
-        "android_client_info": {
-          "package_name": "com.example.shariqkhan.chatsnap"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "910383808950-sts5ph34cs44i3lpdgbrr6scsi9l6ftn.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.shariqkhan.chatsnap",
-            "certificate_hash": "7da262a23fdc115296f954a4d24d8dc66ec553b8"
-          }
-        },
-        {
-          "client_id": "910383808950-t174vrba61tnm03pius4epkfpsiaq9ov.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDl22ltpIudLRrW70NkDWHmmhKN3jZVfvk"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "910383808950-t174vrba61tnm03pius4epkfpsiaq9ov.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:910383808950:android:1ea703cc27fa9ed2",
-        "android_client_info": {
-          "package_name": "com.webxert.listeningsouls"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "910383808950-t174vrba61tnm03pius4epkfpsiaq9ov.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDl22ltpIudLRrW70NkDWHmmhKN3jZVfvk"
+          "current_key": "AIzaSyDjyvJLIvOckGHxK3hMC1E3qcRhQmeFzLs"
         }
       ],
       "services": {
@@ -163,6 +31,94 @@
         "appinvite_service": {
           "status": 1,
           "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445836049634:android:d45c9226a270c5a8",
+        "android_client_info": {
+          "package_name": "com.example.shariqkhan.chatnsnap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445836049634-57defqufcuhj3sbunt1aia0esnm9nad3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.shariqkhan.chatnsnap",
+            "certificate_hash": "7da262a23fdc115296f954a4d24d8dc66ec553b8"
+          }
+        },
+        {
+          "client_id": "445836049634-4qn9bh90i2le3gs70m09m5dsf46727i4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjyvJLIvOckGHxK3hMC1E3qcRhQmeFzLs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445836049634-4qn9bh90i2le3gs70m09m5dsf46727i4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445836049634:android:1ea703cc27fa9ed2",
+        "android_client_info": {
+          "package_name": "com.webxert.listeningsouls"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445836049634-nggcbjp23o4bcfq9ah8237etoqrvjcqf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.webxert.listeningsouls",
+            "certificate_hash": "4847cd933e336ed8d4706e62a928165d0e8a709e"
+          }
+        },
+        {
+          "client_id": "445836049634-4qn9bh90i2le3gs70m09m5dsf46727i4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjyvJLIvOckGHxK3hMC1E3qcRhQmeFzLs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445836049634-4qn9bh90i2le3gs70m09m5dsf46727i4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
