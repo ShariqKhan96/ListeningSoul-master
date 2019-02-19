@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,9 +44,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.webxert.listeningsouls.Remote.APIClient;
+import com.webxert.listeningsouls.Remote.RetrofitBuilder;
 import com.webxert.listeningsouls.adapters.UserChatMessageAdapter;
 import com.webxert.listeningsouls.common.Common;
 import com.webxert.listeningsouls.common.Constants;
@@ -53,18 +57,25 @@ import com.webxert.listeningsouls.fragments.UserChatFragment;
 import com.webxert.listeningsouls.interfaces.LogoutListener;
 import com.webxert.listeningsouls.interfaces.UserIdentityListener;
 import com.webxert.listeningsouls.models.ChatModel;
+import com.webxert.listeningsouls.models.DataMessage;
 import com.webxert.listeningsouls.models.MessageModel;
+import com.webxert.listeningsouls.models.NotificationResponse;
 import com.webxert.listeningsouls.models.SaverModel;
+import com.webxert.listeningsouls.models.User;
 import com.webxert.listeningsouls.utils.Utils;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import io.paperdb.Paper;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity implements LogoutListener, UserIdentityListener {
 
@@ -92,6 +103,9 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
     DatabaseReference markSeenRef;
     public static String USER_ID_FROM_FRAGMENT = "";
     public static Uri IMAGE_PICKED_ADDRESS = null;
+    ProgressBar progressBar;
+    Retrofit retrofit;
+    APIClient client;
 
 
     @Override
@@ -207,6 +221,46 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
         attach_files.setVisibility(View.GONE);
     }
 
+    private void sendNotificationToAdmins(final String type) {
+
+        DatabaseReference users = FirebaseDatabase.getInstance().getReference("Users");
+        Query query = users.orderByChild("is_admin").equalTo(true);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    User user = data.getValue(User.class);
+                    Map<String, String> map = new HashMap<>();
+                    map.put("title", Constants.DOMAIN_NAME_CAPITAL);
+                    map.put("message", "New " + type + " message from Admin");
+                    DataMessage dataMessage = new DataMessage(user.getDevice_token(), map);
+                    client.sendNotification(dataMessage).enqueue(new Callback<NotificationResponse>() {
+                        @Override
+                        public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
+                            if (response.code() == 200) {
+                                if (response.body().success == 1)
+                                    Log.e("Status", "Successful");
+                                else Log.e("Status", "Failure");
+                            } else Log.e("Code", response.code() + "");
+                        }
+
+                        @Override
+                        public void onFailure(Call<NotificationResponse> call, Throwable t) {
+                            Log.e("onFailure", t.getLocalizedMessage());
+                        }
+                    });
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -215,10 +269,16 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
 
+        retrofit = RetrofitBuilder.getRetrofit();
+        client = retrofit.create(APIClient.class);
+
+        Log.e("Token", FirebaseInstanceId.getInstance().getToken());
+
         reader = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE);
         user_layout = findViewById(R.id.user_layout);
         admin_layout = findViewById(R.id.admin_layout);
         submit_button = findViewById(R.id.submit_button);
+        progressBar = findViewById(R.id.progressBar);
         message_text = findViewById(R.id.message_text);
         email = reader.getString(Constants.USER_EMAIL, "null");
         attach_files = findViewById(R.id.select_media);
@@ -234,6 +294,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
 
         } else if (layout_decider.equals(Constants.CUSTOMER_AUTH)) {
 
+            progressBar.setVisibility(View.VISIBLE);
             user_layout.setVisibility(View.VISIBLE);
             admin_layout.setVisibility(View.GONE);
             user_recyclerview = findViewById(R.id.user_message_list);
@@ -278,7 +339,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     message_text.requestFocus();
-
+                                    sendNotificationToAdmins("text");
                                     ChatModel model = new ChatModel();
                                     model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                     model.setSeen(false);
@@ -487,6 +548,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 dialog.dismiss();
+                progressBar.setVisibility(View.GONE);
                 messages_found = true;
                 //Toast.makeText(MainActivity.this, ""+dataSnapshot.getChildrenCount(), Toast.LENGTH_SHORT).show();
                 Map<String, String> map = (Map) dataSnapshot.getValue();

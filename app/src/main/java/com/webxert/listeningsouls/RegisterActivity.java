@@ -93,7 +93,8 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
                                         public void onSuccess(AuthResult authResult) {
 
                                             alertDialog.dismiss();
-                                            User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", true, false);
+                                            String device_token = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString("device_token", "null");
+                                            User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", true, false, device_token);
                                             writer.putString(Constants.AUTH_, Constants.Authentication.ADMIN.name());
                                             writer.putBoolean(Constants.LOGIN_, true);
                                             writer.putString(Constants.USER_EMAIL, email.getText().toString());
@@ -160,7 +161,8 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
                                 writer.apply();
 
 
-                                User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", is_adm, false);
+                                String device_token = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString("device_token", "null");
+                                User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", true, false, device_token);
                                 db_ref.child(authResult.getUser().getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {

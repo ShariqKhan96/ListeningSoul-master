@@ -12,9 +12,10 @@ public class User {
     public String ph_no;
     public boolean is_admin;
     public boolean blocked;
+    public String device_token;
 
 
-    public User(String id, String email, String name, String password, String ph_no, boolean is_admin, boolean blocked) {
+    public User(String id, String email, String name, String password, String ph_no, boolean is_admin, boolean blocked, String device_token) {
         this.id = id;
         this.email = email;
         this.name = name;
@@ -22,9 +23,18 @@ public class User {
         this.ph_no = ph_no;
         this.is_admin = is_admin;
         this.blocked = blocked;
+        this.device_token = device_token;
     }
 
     public User() {
+    }
+
+    public String getDevice_token() {
+        return device_token;
+    }
+
+    public void setDevice_token(String device_token) {
+        this.device_token = device_token;
     }
 
     public boolean isBlocked() {

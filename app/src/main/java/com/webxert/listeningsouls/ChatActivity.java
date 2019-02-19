@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,11 +45,15 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.webxert.listeningsouls.Remote.APIClient;
+import com.webxert.listeningsouls.Remote.RetrofitBuilder;
 import com.webxert.listeningsouls.adapters.ChatMessagesAdapter;
 import com.webxert.listeningsouls.common.Common;
 import com.webxert.listeningsouls.common.Constants;
 import com.webxert.listeningsouls.interfaces.LogoutListener;
+import com.webxert.listeningsouls.models.DataMessage;
 import com.webxert.listeningsouls.models.MessageModel;
+import com.webxert.listeningsouls.models.NotificationResponse;
 import com.webxert.listeningsouls.models.SaverModel;
 import com.webxert.listeningsouls.models.User;
 
@@ -59,6 +64,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.paperdb.Paper;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -72,7 +81,8 @@ public class ChatActivity extends AppCompatActivity {
     LogoutListener logoutListener;
     DatabaseReference markSeenRef;
     public RecyclerView recyclerView;
-
+    APIClient client;
+    Retrofit retrofit;
     ImageView submit_button;
     TextView blockedTV;
     EditText message_text;
@@ -85,6 +95,7 @@ public class ChatActivity extends AppCompatActivity {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
     String[] usersName;
     String[] usersIds;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,11 +106,17 @@ public class ChatActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
+
+        retrofit = RetrofitBuilder.getRetrofit();
+        client = retrofit.create(APIClient.class);
+
         recyclerView = findViewById(R.id.user_message_list);
         submit_button = findViewById(R.id.submit_button);
         blockedTV = findViewById(R.id.blocked_message);
         media_select = findViewById(R.id.select_media);
         message_text = findViewById(R.id.message_text);
+        progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.VISIBLE);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -125,22 +142,24 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (!TextUtils.isEmpty(message_text.getText().toString())) {
-                    String message = message_text.getText().toString();
+                    final String message = message_text.getText().toString();
                     message_text.setText("");
                     if (!Common.checkBlockStatus(id)) {
                         FirebaseDatabase.getInstance().getReference("Messages").child(id)
                                 .child(Constants.DOMAIN_NAME).push().setValue
                                 (new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "1",
                                         message, "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                        simpleDateFormat.format(Calendar.getInstance().getTime()), "text", Constants.DOMAIN_NAME, id, "Not Seen", "none")).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                //message_text.setText("");
-                                message_text.requestFocus();
+                                        simpleDateFormat.format(Calendar.getInstance().getTime()), "text", Constants.DOMAIN_NAME, id, "Not Seen", "none")).
+                                addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        //message_text.setText("");
+                                        sendNotificationToUser("text");
+                                        message_text.requestFocus();
 
-                                displayMessages();
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
+                                        displayMessages();
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 Log.e(MainActivity.class.getSimpleName(), e.getMessage());
@@ -159,6 +178,50 @@ public class ChatActivity extends AppCompatActivity {
         displayMessages();
     }
 
+    private void sendNotificationToUser(final String type) {
+
+        DatabaseReference users = FirebaseDatabase.getInstance().getReference("Users");
+        users.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    User user = data.getValue(User.class);
+                    if (user.getId().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                        Map<String, String> map = new HashMap<>();
+                        map.put("title", Constants.DOMAIN_NAME_CAPITAL);
+                        map.put("message", "New " + type + " message from Admin");
+                        DataMessage dataMessage = new DataMessage(user.getDevice_token(), map);
+                        client.sendNotification(dataMessage).enqueue(new Callback<NotificationResponse>() {
+                            @Override
+                            public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
+                                if (response.code() == 200) {
+                                    if (response.body().success == 1)
+                                        Log.e("Status", "Successful");
+                                    else Log.e("Status", "Failure");
+                                } else Log.e("Code", response.code() + "");
+                            }
+
+                            @Override
+                            public void onFailure(Call<NotificationResponse> call, Throwable t) {
+                                Log.e("onFailure", t.getLocalizedMessage());
+                            }
+                        });
+
+                        break;
+                    }
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     private void displayMessages() {
 
         markStatusToSeen();
@@ -167,6 +230,7 @@ public class ChatActivity extends AppCompatActivity {
         message_ref.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                progressBar.setVisibility(View.GONE);
                 //Toast.makeText(MainActivity.this, ""+dataSnapshot.getChildrenCount(), Toast.LENGTH_SHORT).show();
                 Map<String, String> map = (Map) dataSnapshot.getValue();
                 SaverModel saverModel = new SaverModel(dataSnapshot.getKey(), map);
@@ -245,6 +309,29 @@ public class ChatActivity extends AppCompatActivity {
         model.setStatus("Seen");
         key.setValue(model);
         Log.e("Updated", "Updated at: " + key.getKey());
+
+        markAllSeenInBackground();
+    }
+
+    private void markAllSeenInBackground() {
+        markSeenRef = FirebaseDatabase.getInstance().getReference("Messages").child(id).child(Constants.DOMAIN_NAME);
+        Query query = markSeenRef.orderByChild("status").equalTo("Not Seen");
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    MessageModel model = data.getValue(MessageModel.class);
+                    if (model.getId_sender().equals(id) && model.getId_receiver().equals(Constants.DOMAIN_NAME))
+                        if (model.getStatus().equals("Not Seen"))
+                            data.getRef().child("status").setValue("Seen");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(ChatActivity.this, "Background Exception", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void addNewMessage(ArrayList<SaverModel> arrayList, ArrayList<MessageModel> messages, ChatMessagesAdapter chatMessagesAdapter, SaverModel saverModel) {
@@ -649,4 +736,5 @@ public class ChatActivity extends AppCompatActivity {
         blockedTV.setVisibility(View.VISIBLE);
         media_select.setVisibility(View.GONE);
     }
+
 }
