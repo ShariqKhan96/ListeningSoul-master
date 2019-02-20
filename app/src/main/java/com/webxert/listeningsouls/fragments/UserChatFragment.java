@@ -34,6 +34,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.webxert.listeningsouls.AdminChatActivity;
 import com.webxert.listeningsouls.ChatActivity;
 import com.webxert.listeningsouls.MainActivity;
 import com.webxert.listeningsouls.R;
@@ -130,12 +131,17 @@ public class UserChatFragment extends Fragment {
     }
 
     private void openAdminFragment() {
-        AdminChatFragment adminChatFragment = new AdminChatFragment();
-        adminChatFragment.setLogoutListener(logoutListener);
-        getActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.admin_layout, adminChatFragment)
-                .addToBackStack(null)
-                .commit();
+
+//        AdminChatFragment adminChatFragment = new AdminChatFragment();
+//        adminChatFragment.setLogoutListener(logoutListener);
+//        getActivity().getSupportFragmentManager().beginTransaction()
+//                .replace(R.id.admin_layout, adminChatFragment)
+//                .addToBackStack(null)
+//                .commit();
+        Intent intent = new Intent(getContext(), AdminChatActivity.class);
+        startActivity(intent);
+
+
     }
 
     private void getData() {

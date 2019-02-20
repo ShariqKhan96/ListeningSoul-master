@@ -1,6 +1,7 @@
 package com.webxert.listeningsouls;
 
 import android.app.ProgressDialog;
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -316,8 +317,8 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
                 public void onClick(View v) {
                     Intent intent = new Intent();
                     intent.setType("image/*");
+                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                     intent.setAction(Intent.ACTION_GET_CONTENT);
-
                     startActivityForResult(intent, IMAGE_PICK_CODE_USER_TO_ADMIN);
 
                 }
@@ -388,14 +389,19 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         // super.onActivityResult(requestCode, resultCode, data);
         Log.e("RequestCode", requestCode + "");
-        if (requestCode == IMAGE_PICK_CODE_USER_TO_ADMIN && resultCode == RESULT_OK && data != null) {
-            final Uri uri = data.getData();
-            final ProgressDialog dialog = new ProgressDialog(this);
-            dialog.setTitle("Sending Media");
-            dialog.setMessage("Please Wait");
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.show();
-            sendMediaAsUser(uri, dialog);
+        if (requestCode == IMAGE_PICK_CODE_USER_TO_ADMIN && resultCode == RESULT_OK) {
+            if (data.getClipData() != null) {
+                sendMultiImages(data.getClipData());
+            } else if (data.getData() != null) {
+
+                final Uri uri = data.getData();
+                final ProgressDialog dialog = new ProgressDialog(this);
+                dialog.setTitle("Sending Media");
+                dialog.setMessage("Please Wait");
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
+                sendMediaAsUser(uri, dialog);
+            }
 
 
         } else if (requestCode == IMAGE_PICK_CODE_ADMIN_TO_USER && resultCode == RESULT_OK && data != null) {
@@ -405,60 +411,77 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
         }
     }
 
-    private void sendMediaAsAdmin(Uri uri, final ProgressDialog dialog) {
+    private void sendMultiImages(ClipData clipData) {
+        final ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setTitle("Please Wait");
+        // dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(Constants.DOMAIN_NAME);
-        String imageName = messageRef.push().getKey();
-        final StorageReference imagesRef = FirebaseStorage.getInstance().getReference("images").child(imageName + ".jpg");
-        UploadTask uploadTask = imagesRef.putFile(uri);
-        uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful())
-                    throw task.getException();
-                return imagesRef.getDownloadUrl();
-            }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                dialog.dismiss();
-                if (task.isSuccessful()) {
+        int totalItems = clipData.getItemCount();
+        String message = "";
 
-                    FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                            .child(Constants.DOMAIN_NAME).push().
-                            setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", "", "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                    simpleDateFormat.format(Calendar.getInstance().getTime()), "image", Constants.DOMAIN_NAME, USER_ID_FROM_FRAGMENT, "Not Seen", task.getResult().toString())).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            message_text.requestFocus();
+        //dialog.setMax(totalItems);
+        for (int i = 0; i < totalItems; i++) {
+            Uri uri = clipData.getItemAt(i).getUri();
+            message = "Sending " + i + 1 + " of " + totalItems;
+            dialog.setMessage(message);
+            String imageName = messageRef.push().getKey() + ".jpg";
+            final StorageReference imagesRef = FirebaseStorage.getInstance().getReference("images").child(imageName + ".jpg");
+            UploadTask uploadTask = imagesRef.putFile(uri);
+            uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful())
+                        throw task.getException();
+                    return imagesRef.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    dialog.dismiss();
+                    if (task.isSuccessful()) {
 
-                            ChatModel model = new ChatModel();
-                            model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                            model.setSeen(false);
-                            Date date = Calendar.getInstance().getTime();
-                            Log.e("date", date.toString());
-                            model.setDate(date);
-                            model.setTimestamp(-1 * new Date().getTime());
-                            model.setAssignedTo(Paper.book().read("assign_id", "None"));
-                            model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
-                            FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                    .setValue(model);
-                            displayMessages();
+                        FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                .child(Constants.DOMAIN_NAME).push().
+                                setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", "", "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                        simpleDateFormat.format(Calendar.getInstance().getTime()), "image", Constants.DOMAIN_NAME, USER_ID_FROM_FRAGMENT, "Not Seen", task.getResult().toString())).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                message_text.requestFocus();
 
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(MainActivity.class.getSimpleName(), e.getMessage());
-                            Toast.makeText(MainActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                ChatModel model = new ChatModel();
+                                model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                model.setSeen(false);
+                                Date date = Calendar.getInstance().getTime();
+                                Log.e("date", date.toString());
+                                model.setDate(date);
+                                model.setTimestamp(-1 * new Date().getTime());
+                                model.setAssignedTo(Paper.book().read("assign_id", "None"));
+                                model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
+                                FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                        .setValue(model);
+                                displayMessages();
 
-                        }
-                    });
-                } else
-                    Log.e("DownloadUrlException", task.getException().getMessage());
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e(MainActivity.class.getSimpleName(), e.getMessage());
+                                Toast.makeText(MainActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
 
-            }
-        });
+                            }
+                        });
+                    } else
+                        Log.e("DownloadUrlException", task.getException().getMessage());
+
+                }
+            });
+
+
+        }
+        dialog.dismiss();
     }
+
+
 
     private void sendMediaAsUser(Uri uri, final ProgressDialog dialog) {
         DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(Constants.DOMAIN_NAME);
@@ -593,14 +616,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
         });
     }
 
-    private void setLogReference() {
-        DatabaseReference logRef = FirebaseDatabase.getInstance().getReference("Logs");
-        com.webxert.listeningsouls.models.Log log = new com.webxert.listeningsouls.models.Log();
-        log.setBy("No one");
-        log.setNote("");
-        log.setTime("");
-        logRef.setValue(log);
-    }
+
 
     private void addNewMessage(ArrayList<SaverModel> arrayList, ArrayList<MessageModel> messages, UserChatMessageAdapter chatMessagesAdapter, SaverModel saverModel) {
         arrayList.add(saverModel);
