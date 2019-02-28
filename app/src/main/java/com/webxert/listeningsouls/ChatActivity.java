@@ -158,7 +158,7 @@ public class ChatActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         //message_text.setText("");
-                                        sendNotificationToUser("text");
+                                        //sendNotificationToUser("text");
                                         message_text.requestFocus();
 
                                         displayMessages();
@@ -748,9 +748,11 @@ public class ChatActivity extends AppCompatActivity {
         blockedTV.setVisibility(View.VISIBLE);
         media_select.setVisibility(View.GONE);
     }
+
     private void sendMultiImages(ClipData clipData) {
         final ProgressDialog dialog = new ProgressDialog(this);
         dialog.setTitle("Please Wait");
+
         // dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference("Messages").child(id).child(Constants.DOMAIN_NAME);
         int totalItems = clipData.getItemCount();
@@ -761,6 +763,7 @@ public class ChatActivity extends AppCompatActivity {
             Uri uri = clipData.getItemAt(i).getUri();
             message = "Sending " + i + 1 + " of " + totalItems;
             dialog.setMessage(message);
+            dialog.show();
             String imageName = messageRef.push().getKey() + ".jpg";
             final StorageReference imagesRef = FirebaseStorage.getInstance().getReference("images").child(imageName + ".jpg");
             UploadTask uploadTask = imagesRef.putFile(uri);
@@ -815,7 +818,7 @@ public class ChatActivity extends AppCompatActivity {
 
 
         }
-        dialog.dismiss();
+       // dialog.dismiss();
     }
 
 }

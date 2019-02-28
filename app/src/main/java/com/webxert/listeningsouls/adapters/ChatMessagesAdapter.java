@@ -22,6 +22,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
+import com.squareup.picasso.Picasso;
 import com.webxert.listeningsouls.MyGlideProvider;
 import com.webxert.listeningsouls.R;
 import com.webxert.listeningsouls.common.Constants;
@@ -89,6 +90,8 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapte
                         }
                     })
                     .into(myVH.image);
+//            Picasso.get().load(arrayList.get(i).getImage_url())
+//                    .into(myVH.image);
         } else {
             myVH.image.setImageDrawable(null);
         }

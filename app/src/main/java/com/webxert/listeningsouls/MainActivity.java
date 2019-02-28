@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
     ProgressBar progressBar;
     Retrofit retrofit;
     APIClient client;
+    String myId;
 
 
     @Override
@@ -269,11 +270,14 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
+        myId = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.ID, "");
 
         retrofit = RetrofitBuilder.getRetrofit();
         client = retrofit.create(APIClient.class);
 
         Log.e("Token", FirebaseInstanceId.getInstance().getToken());
+
+        updateTokenToServer(FirebaseInstanceId.getInstance().getToken());
 
         reader = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE);
         user_layout = findViewById(R.id.user_layout);
@@ -340,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     message_text.requestFocus();
-                                    sendNotificationToAdmins("text");
+                                    //sendNotificationToAdmins("text");
                                     ChatModel model = new ChatModel();
                                     model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                     model.setSeen(false);
@@ -385,6 +389,9 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
 
     }
 
+    private void updateTokenToServer(String token) {
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         // super.onActivityResult(requestCode, resultCode, data);
@@ -414,16 +421,20 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
     private void sendMultiImages(ClipData clipData) {
         final ProgressDialog dialog = new ProgressDialog(this);
         dialog.setTitle("Please Wait");
+
         // dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(Constants.DOMAIN_NAME);
         int totalItems = clipData.getItemCount();
         String message = "";
+        dialog.setCanceledOnTouchOutside(false);
+
 
         //dialog.setMax(totalItems);
         for (int i = 0; i < totalItems; i++) {
             Uri uri = clipData.getItemAt(i).getUri();
-            message = "Sending " + i + 1 + " of " + totalItems;
+            message = "Sending " + (i + 1) + " of " + totalItems;
             dialog.setMessage(message);
+            dialog.show();
             String imageName = messageRef.push().getKey() + ".jpg";
             final StorageReference imagesRef = FirebaseStorage.getInstance().getReference("images").child(imageName + ".jpg");
             UploadTask uploadTask = imagesRef.putFile(uri);
@@ -442,8 +453,8 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
 
                         FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                 .child(Constants.DOMAIN_NAME).push().
-                                setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", "", "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                        simpleDateFormat.format(Calendar.getInstance().getTime()), "image", Constants.DOMAIN_NAME, USER_ID_FROM_FRAGMENT, "Not Seen", task.getResult().toString())).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", "", "0", FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                        simpleDateFormat.format(Calendar.getInstance().getTime()), "image", FirebaseAuth.getInstance().getCurrentUser().getUid(), Constants.DOMAIN_NAME, "Not Seen", task.getResult().toString())).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 message_text.requestFocus();
@@ -478,12 +489,12 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
 
 
         }
-        dialog.dismiss();
+        //dialog.dismiss();
     }
 
 
-
     private void sendMediaAsUser(Uri uri, final ProgressDialog dialog) {
+
         DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(Constants.DOMAIN_NAME);
         String imageName = messageRef.push().getKey();
         final StorageReference imagesRef = FirebaseStorage.getInstance().getReference("images").child(imageName + ".jpg");
@@ -553,24 +564,43 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
         // setLogReference();
         markStatusToSeen();
         final ProgressDialog dialog = Utils.getMessageProgressDialog(this);
-        dialog.show();
+        //dialog.show();
 
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                dialog.dismiss();
-                if (!messages_found)
-                    Toast.makeText(MainActivity.this, "No messages found!", Toast.LENGTH_SHORT).show();
-            }
-        }, 5000);
+//        Handler handler = new Handler();
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                //dialog.dismiss();
+//                progressBar.setVisibility(View.GONE);
+//                if (!messages_found)
+//                    Toast.makeText(MainActivity.this, "No messages found!", Toast.LENGTH_SHORT).show();
+//            }
+//        }, 5000);
 
         DatabaseReference message_ref = FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(Constants.DOMAIN_NAME);
+
+        DatabaseReference mr = FirebaseDatabase.getInstance().getReference("Messages").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(Constants.DOMAIN_NAME);
+        mr.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getChildrenCount() == 0) {
+                    progressBar.setVisibility(View.GONE);
+                    // Toast.makeText(MainActivity.this, "No messages found", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         message_ref.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                dialog.dismiss();
+
+
+                // dialog.dismiss();
                 progressBar.setVisibility(View.GONE);
                 messages_found = true;
                 //Toast.makeText(MainActivity.this, ""+dataSnapshot.getChildrenCount(), Toast.LENGTH_SHORT).show();
@@ -615,7 +645,6 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
             }
         });
     }
-
 
 
     private void addNewMessage(ArrayList<SaverModel> arrayList, ArrayList<MessageModel> messages, UserChatMessageAdapter chatMessagesAdapter, SaverModel saverModel) {

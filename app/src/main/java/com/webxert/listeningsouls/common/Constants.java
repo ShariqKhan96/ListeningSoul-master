@@ -28,6 +28,7 @@ public class Constants {
     public static List<User> userList = new ArrayList<>();
     public static List<User> adminList = new ArrayList<>();
     public static final String DOMAIN_NAME_CAPITAL = "Listening Souls";
+    public static final String ID = "id";
 
     public static final int SPLASH_TIME = 2000;
     public static final String SH_PREFS = "SharedPreferences";

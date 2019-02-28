@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
@@ -22,6 +23,7 @@ public class MyFirebaseService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String s) {
         super.onNewToken(s);
+        Log.e("NewToken", s);
         saveInSharedPrefs(s);
         if (FirebaseAuth.getInstance().getCurrentUser() != null)
             updateTokenToServer(FirebaseAuth.getInstance().getCurrentUser().getUid(), s);

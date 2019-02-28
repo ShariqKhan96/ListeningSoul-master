@@ -21,6 +21,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
+import com.squareup.picasso.Picasso;
 import com.webxert.listeningsouls.R;
 import com.webxert.listeningsouls.common.Constants;
 import com.webxert.listeningsouls.models.MessageModel;
@@ -76,7 +77,7 @@ public class UserChatMessageAdapter extends RecyclerView.Adapter<UserChatMessage
                     .listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            Log.e("onLoadFailed","onLoadFailed");
+                            Log.e("onLoadFailed",e.getMessage());
                             myVH.progressBar.setVisibility(View.GONE);
                             return false;
                         }
@@ -89,6 +90,8 @@ public class UserChatMessageAdapter extends RecyclerView.Adapter<UserChatMessage
                         }
                     })
                     .into(myVH.image);
+//            Picasso.get().load(arrayList.get(i).getImage_url())
+//                    .into(myVH.image);
         } else {
             myVH.image.setImageDrawable(null);
         }

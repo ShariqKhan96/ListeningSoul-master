@@ -159,6 +159,7 @@ public class LoginActivity extends AppCompatActivity implements RemoveCallBackLi
                         writer.putString(Constants.AUTH_, Constants.Authentication.CUSTOMER.name());
                     writer.putString(Constants.USER_NAME, email.getText().toString());
                     writer.putString(Constants.USER_EMAIL, email.getText().toString());
+                    writer.putString(Constants.ID, authResult.getUser().getUid());
                     writer.putBoolean(Constants.LOGIN_, true);
                     writer.apply();
 

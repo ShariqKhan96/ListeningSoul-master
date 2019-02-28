@@ -99,6 +99,7 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
                                             writer.putBoolean(Constants.LOGIN_, true);
                                             writer.putString(Constants.USER_EMAIL, email.getText().toString());
                                             writer.putString(Constants.USER_NAME, name.getText().toString());
+                                            writer.putString(Constants.ID, authResult.getUser().getUid());
                                             writer.apply();
                                             db_ref.child(authResult.getUser().getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
@@ -157,12 +158,13 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
                                 writer.putString(Constants.AUTH_, Constants.Authentication.CUSTOMER.name());
                                 writer.putBoolean(Constants.LOGIN_, true);
                                 writer.putString(Constants.USER_EMAIL, email.getText().toString());
+                                writer.putString(Constants.ID, authResult.getUser().getUid());
                                 writer.putString(Constants.USER_NAME, name.getText().toString());
                                 writer.apply();
 
 
                                 String device_token = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString("device_token", "null");
-                                User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", true, false, device_token);
+                                User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", false, false, device_token);
                                 db_ref.child(authResult.getUser().getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {

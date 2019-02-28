@@ -146,17 +146,32 @@ public class UserChatFragment extends Fragment {
 
     private void getData() {
 
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+//        Handler handler = new Handler();
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (!message_found) {
+//                    Toast.makeText(getContext(), "No chats found with users or slow connection!", Toast.LENGTH_SHORT).show();
+//                    dialog.dismiss();
+//                }
+//
+//            }
+//        }, 6000);
+
+
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("chats");
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void run() {
-                if (!message_found) {
-                    Toast.makeText(getContext(), "No chats found with users or slow connection!", Toast.LENGTH_SHORT).show();
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getChildrenCount() == 0)
                     dialog.dismiss();
-                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        }, 6000);
+        });
 
         dialog = Utils.getChatProgressDialog(getContext());
         dialog.show();
