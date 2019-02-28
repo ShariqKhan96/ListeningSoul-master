@@ -8,15 +8,15 @@
     <item
         android:id="@+id/assign_to"
         android:orderInCategory="200"
-        android:title="Assign To" />
+        android:title="Assign so" />
     <item
         android:id="@+id/convo_status"
-        android:title="Conversation Status">
+        android:title="Conversation status">
 
     </item>
     <item
         android:id="@+id/block_user"
-        android:title="Block this user" />
+        android:title="Block option" />
     <item
         android:id="@+id/logout"
         android:orderInCategory="500"

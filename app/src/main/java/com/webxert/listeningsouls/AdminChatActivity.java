@@ -2,12 +2,14 @@ package com.webxert.listeningsouls;
 
 import android.app.ProgressDialog;
 import android.content.ClipData;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -226,48 +228,69 @@ public class AdminChatActivity extends AppCompatActivity {
         });
     }
 
-    private void sendMediaAsAdmin(Uri uri, final ProgressDialog dialog) {
-        DatabaseReference message_ref = FirebaseDatabase.getInstance().getReference("AdminMessages");
-        String imageName = message_ref.push().getKey();
-        final StorageReference imagesRef = FirebaseStorage.getInstance().getReference("images").child(imageName + ".jpg");
-        UploadTask uploadTask = imagesRef.putFile(uri);
-        uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+    private void sendMediaAsAdmin(final Uri uri, final ProgressDialog dialog) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(AdminChatActivity.this);
+        builder.setTitle("Sending confirmation");
+        builder.setMessage("Are you sure?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                Log.e("UploadTaskStatus", task.getResult().toString());
-                if (!task.isSuccessful())
-                    throw task.getException();
-                return imagesRef.getDownloadUrl();
-            }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                dialog.dismiss();
-                if (task.isSuccessful()) {
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                DatabaseReference message_ref = FirebaseDatabase.getInstance().getReference("AdminMessages");
+                String imageName = message_ref.push().getKey();
+                final StorageReference imagesRef = FirebaseStorage.getInstance().getReference("images").child(imageName + ".jpg");
+                UploadTask uploadTask = imagesRef.putFile(uri);
+                uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                    @Override
+                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                        Log.e("UploadTaskStatus", task.getResult().toString());
+                        if (!task.isSuccessful())
+                            throw task.getException();
+                        return imagesRef.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        dialog.dismiss();
+                        if (task.isSuccessful()) {
 
-                    FirebaseDatabase.getInstance().getReference("AdminMessages").push().
-                            setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", "", "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                    simpleDateFormat.format(Calendar.getInstance().getTime()), "image", Constants.DOMAIN_NAME, Constants.DOMAIN_NAME, "Not Seen", task.getResult().toString())).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            message_text.requestFocus();
-                            //sendNotificationToAdmins("image");
-                            displayMessages();
+                            FirebaseDatabase.getInstance().getReference("AdminMessages").push().
+                                    setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", "", "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                            simpleDateFormat.format(Calendar.getInstance().getTime()), "image", Constants.DOMAIN_NAME, Constants.DOMAIN_NAME, "Not Seen", task.getResult().toString())).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    message_text.requestFocus();
+                                    //sendNotificationToAdmins("image");
+                                    displayMessages();
 
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(MainActivity.class.getSimpleName(), e.getMessage());
-                            Toast.makeText(AdminChatActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.e(MainActivity.class.getSimpleName(), e.getMessage());
+                                    Toast.makeText(AdminChatActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
 
-                        }
-                    });
-                } else
-                    Log.e("DownloadUrlException", task.getException().getMessage());
+                                }
+                            });
+                        } else
+                            Log.e("DownloadUrlException", task.getException().getMessage());
+
+                    }
+                });
 
             }
         });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+
+            }
+        });
+
+        builder.show();
+
     }
 
     private void displayMessages() {
@@ -292,7 +315,7 @@ public class AdminChatActivity extends AppCompatActivity {
         mr.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getChildrenCount() == 0)
+                if (dataSnapshot.getChildrenCount() == 0)
                     progressBar.setVisibility(View.GONE);
             }
 
@@ -392,74 +415,94 @@ public class AdminChatActivity extends AppCompatActivity {
         }
     }
 
-    private void sendMultiImages(ClipData clipData) {
-        final ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setTitle("Please Wait");
-        // dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference("AdminMessages");
-        int totalItems = clipData.getItemCount();
-        String message = "";
+    private void sendMultiImages(final ClipData clipData) {
 
-        //dialog.setMax(totalItems);
-        for (int i = 0; i < totalItems; i++) {
-            Uri uri = clipData.getItemAt(i).getUri();
-            message = "Sending " + i + 1 + " of " + totalItems;
-            dialog.setMessage(message);
-            dialog.show();
-            String imageName = messageRef.push().getKey() + ".jpg";
-            final StorageReference imagesRef = FirebaseStorage.getInstance().getReference("images").child(imageName + ".jpg");
-            UploadTask uploadTask = imagesRef.putFile(uri);
-            uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                @Override
-                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                    if (!task.isSuccessful())
-                        throw task.getException();
-                    return imagesRef.getDownloadUrl();
+        AlertDialog.Builder builder = new AlertDialog.Builder(AdminChatActivity.this);
+        builder.setTitle("Sending confirmation");
+        builder.setMessage("Are you sure?");
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int pos) {
+                dialogInterface.dismiss();
+                final ProgressDialog dialog = new ProgressDialog(AdminChatActivity.this);
+                dialog.setTitle("Please Wait");
+                // dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference("AdminMessages");
+                int totalItems = clipData.getItemCount();
+                String message = "";
+
+                //dialog.setMax(totalItems);
+                for (int i = 0; i < totalItems; i++) {
+                    Uri uri = clipData.getItemAt(i).getUri();
+                    message = "Sending " + i + 1 + " of " + totalItems;
+                    dialog.setMessage(message);
+                    dialog.show();
+                    String imageName = messageRef.push().getKey() + ".jpg";
+                    final StorageReference imagesRef = FirebaseStorage.getInstance().getReference("images").child(imageName + ".jpg");
+                    UploadTask uploadTask = imagesRef.putFile(uri);
+                    uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if (!task.isSuccessful())
+                                throw task.getException();
+                            return imagesRef.getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            dialog.dismiss();
+                            if (task.isSuccessful()) {
+
+                                FirebaseDatabase.getInstance().getReference("AdminMessages").push().
+                                        setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", "", "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                                simpleDateFormat.format(Calendar.getInstance().getTime()), "image", Constants.DOMAIN_NAME, Constants.DOMAIN_NAME, "Not Seen", task.getResult().toString()))
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                message_text.requestFocus();
+
+                                                ChatModel model = new ChatModel();
+                                                model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                                model.setSeen(false);
+                                                Date date = Calendar.getInstance().getTime();
+                                                Log.e("date", date.toString());
+                                                model.setDate(date);
+                                                model.setTimestamp(-1 * new Date().getTime());
+                                                model.setAssignedTo(Paper.book().read("assign_id", "None"));
+                                                model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
+                                                FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                                        .setValue(model);
+                                                displayMessages();
+
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.e(MainActivity.class.getSimpleName(), e.getMessage());
+                                        Toast.makeText(AdminChatActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                                    }
+                                });
+                            } else
+                                Log.e("DownloadUrlException", task.getException().getMessage());
+
+                        }
+                    });
+
+
                 }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    dialog.dismiss();
-                    if (task.isSuccessful()) {
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
 
-                        FirebaseDatabase.getInstance().getReference("AdminMessages").push().
-                                setValue(new MessageModel(FirebaseAuth.getInstance().getCurrentUser().getEmail(), "0", "", "1", FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                        simpleDateFormat.format(Calendar.getInstance().getTime()), "image", Constants.DOMAIN_NAME, Constants.DOMAIN_NAME, "Not Seen", task.getResult().toString()))
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                message_text.requestFocus();
+            }
+        });
+        builder.show();
 
-                                ChatModel model = new ChatModel();
-                                model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                model.setSeen(false);
-                                Date date = Calendar.getInstance().getTime();
-                                Log.e("date", date.toString());
-                                model.setDate(date);
-                                model.setTimestamp(-1 * new Date().getTime());
-                                model.setAssignedTo(Paper.book().read("assign_id", "None"));
-                                model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
-                                FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                        .setValue(model);
-                                displayMessages();
-
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e(MainActivity.class.getSimpleName(), e.getMessage());
-                                Toast.makeText(AdminChatActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
-
-                            }
-                        });
-                    } else
-                        Log.e("DownloadUrlException", task.getException().getMessage());
-
-                }
-            });
-
-
-        }
-       // dialog.dismiss();
+        // dialog.dismiss();
     }
 }
