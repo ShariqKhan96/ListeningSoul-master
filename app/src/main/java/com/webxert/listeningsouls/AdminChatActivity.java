@@ -406,7 +406,7 @@ public class AdminChatActivity extends AppCompatActivity {
                 final Uri uri = data.getData();
                 final ProgressDialog dialog = new ProgressDialog(this);
                 dialog.setTitle("Sending Media");
-                dialog.setMessage("Please Wait");
+                dialog.setMessage("Sending 1 of 1 image please wait");
                 dialog.setCanceledOnTouchOutside(false);
                 dialog.show();
                 sendMediaAsAdmin(uri, dialog);
@@ -426,7 +426,7 @@ public class AdminChatActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialogInterface, int pos) {
                 dialogInterface.dismiss();
                 final ProgressDialog dialog = new ProgressDialog(AdminChatActivity.this);
-                dialog.setTitle("Please Wait");
+                dialog.setTitle("Sending Media");
                 // dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference("AdminMessages");
                 int totalItems = clipData.getItemCount();
@@ -435,7 +435,7 @@ public class AdminChatActivity extends AppCompatActivity {
                 //dialog.setMax(totalItems);
                 for (int i = 0; i < totalItems; i++) {
                     Uri uri = clipData.getItemAt(i).getUri();
-                    message = "Sending " + i + 1 + " of " + totalItems;
+                    message = "Sending " + i + 1 + " of " + totalItems + " images please wait";
                     dialog.setMessage(message);
                     dialog.show();
                     String imageName = messageRef.push().getKey() + ".jpg";

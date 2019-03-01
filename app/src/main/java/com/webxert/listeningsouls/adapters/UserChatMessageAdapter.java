@@ -1,6 +1,8 @@
 package com.webxert.listeningsouls.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
@@ -20,8 +22,11 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.github.chrisbanes.photoview.PhotoView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
+import com.webxert.listeningsouls.GlideApp;
+import com.webxert.listeningsouls.PhotoActivity;
 import com.webxert.listeningsouls.R;
 import com.webxert.listeningsouls.common.Constants;
 import com.webxert.listeningsouls.models.MessageModel;
@@ -71,27 +76,25 @@ public class UserChatMessageAdapter extends RecyclerView.Adapter<UserChatMessage
             myVH.image_layout.setVisibility(View.VISIBLE);
             myVH.progressBar.setVisibility(View.VISIBLE);
             myVH.image.setVisibility(View.VISIBLE);
-            Log.e("ImageUrl",arrayList.get(i).getImage_url() );
-            Glide.with(context)
+            Log.e("ImageUrl", arrayList.get(i).getImage_url());
+            GlideApp.with(context)
                     .load(arrayList.get(i).getImage_url())
                     .listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            Log.e("onLoadFailed",e.getMessage());
+                            Log.e("onLoadFailed", e.getMessage());
                             myVH.progressBar.setVisibility(View.GONE);
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            Log.e("onResourceReady","onResourceReady");
+                            Log.e("onResourceReady", "onResourceReady");
                             myVH.progressBar.setVisibility(View.GONE);
                             return false;
                         }
                     })
                     .into(myVH.image);
-//            Picasso.get().load(arrayList.get(i).getImage_url())
-//                    .into(myVH.image);
         } else {
             myVH.image.setImageDrawable(null);
         }
@@ -101,15 +104,48 @@ public class UserChatMessageAdapter extends RecyclerView.Adapter<UserChatMessage
             myVH.personName.setText(arrayList.get(i).getEmail().substring(0, 1).toUpperCase());
         } else
             myVH.profile_image.setVisibility(View.GONE);
+
+        myVH.image_layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (arrayList.get(myVH.getAdapterPosition()).getMessage_type().equals("image")) {
+                    Log.e("Url",arrayList.get(myVH.getAdapterPosition()).getImage_url() );
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//                    View view = LayoutInflater.from(context).inflate(R.layout.photo_dialog, null);
+//                    final ProgressBar progressBar = view.findViewById(R.id.progressBar);
 //
-//        if (i == arrayList.size() - 1) {
-//            if (arrayList.get(i).is_seen) {
-//                myVH.is_seen.setText("Seen");
-//            } else
-//                myVH.is_seen.setVisibility(View.GONE);
-//        }
+//                   // progressBar.setVisibility(View.VISIBLE);
+//                    ImageView photoView = view.findViewById(R.id.photo_view);
+////                    Glide.with(context).load(arrayList.get(myVH.getAdapterPosition()).getImage_url())
+////                            .listener(new RequestListener<Drawable>() {
+////                                @Override
+////                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+////                                   Log.e("Error", e.getMessage());
+////                                    progressBar.setVisibility(View.GONE);
+////                                    return false;
+////                                }
+////
+////                                @Override
+////                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+////                                    Log.e("onResourceReady","onResourceReady");
+////
+////                                    progressBar.setVisibility(View.GONE);
+////                                    return false;
+////                                }
+////                            })
+////                            .into(photoView);
+//                    builder.setView(view);
+//                    //photoView.setImageResource(R.mipmap.ic_launcher);
+//                    //Picasso.get().load(arrayList.get(myVH.getAdapterPosition()).getImage_url()).into(photoView);
+//
+//                    builder.show();
+                    Intent intent = new Intent(context, PhotoActivity.class);
+                    intent.putExtra("url",arrayList.get(myVH.getAdapterPosition()).getImage_url() );
+                    context.startActivity(intent);
 
-
+                }
+            }
+        });
     }
 
     @Override
@@ -140,6 +176,8 @@ public class UserChatMessageAdapter extends RecyclerView.Adapter<UserChatMessage
             image_layout = itemView.findViewById(R.id.image_layout);
             progressBar = itemView.findViewById(R.id.progressBar);
         }
+
+
     }
 
     @Override

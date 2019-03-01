@@ -170,7 +170,8 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
                                     public void onSuccess(Void aVoid) {
 
                                         getAllUsers();
-                                        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+
+                                        Intent intent = new Intent(RegisterActivity.this, LandActivity.class);
                                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         startActivity(intent);
                                         finish();

@@ -32,7 +32,9 @@
         <activity android:name=".LoginActivity" />
         <activity android:name=".RegisterActivity" />
         <activity android:name=".ChatActivity" />
-        <activity android:name=".AdminChatActivity"></activity>
+        <activity android:name=".AdminChatActivity" />
+        <activity android:name=".PhotoActivity" />
+        <activity android:name=".LandActivity"></activity>
     </application>
 
 </manifest>

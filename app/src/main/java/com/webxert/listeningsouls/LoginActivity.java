@@ -163,10 +163,18 @@ public class LoginActivity extends AppCompatActivity implements RemoveCallBackLi
                     writer.putBoolean(Constants.LOGIN_, true);
                     writer.apply();
 
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    finish();
+                    if (!is_admin) {
+                        Intent intent = new Intent(LoginActivity.this, LandActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();
+                    } else {
+
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();
+                    }
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
