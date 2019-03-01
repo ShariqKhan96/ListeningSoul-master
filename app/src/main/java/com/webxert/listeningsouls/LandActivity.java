@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 
 public class LandActivity extends AppCompatActivity {
@@ -13,7 +14,7 @@ public class LandActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_land);
 
-        FrameLayout frameLayout = findViewById(R.id.button);
+        Button frameLayout = findViewById(R.id.button);
         frameLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
