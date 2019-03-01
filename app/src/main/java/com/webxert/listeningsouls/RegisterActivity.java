@@ -93,7 +93,8 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
                                         public void onSuccess(AuthResult authResult) {
 
                                             alertDialog.dismiss();
-                                            String device_token = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString("device_token", "null");
+                                            String device_token = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString("device_token", "nl");
+                                            Log.e("Token", device_token);
                                             User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", true, false, device_token);
                                             writer.putString(Constants.AUTH_, Constants.Authentication.ADMIN.name());
                                             writer.putBoolean(Constants.LOGIN_, true);
@@ -163,7 +164,8 @@ public class RegisterActivity extends AppCompatActivity implements RemoveCallBac
                                 writer.apply();
 
 
-                                String device_token = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString("device_token", "null");
+                                String device_token = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString("device_token", "nl");
+                                Log.e("Token", device_token);
                                 User user = new User(authResult.getUser().getUid(), email.getText().toString(), name.getText().toString(), password.getText().toString(), "123", false, false, device_token);
                                 db_ref.child(authResult.getUser().getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override

@@ -271,12 +271,12 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
-        myId = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.ID, "");
+        //myId = getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.ID, "");
 
         retrofit = RetrofitBuilder.getRetrofit();
         client = retrofit.create(APIClient.class);
 
-        Log.e("Token", FirebaseInstanceId.getInstance().getToken());
+        //Log.e("Token", FirebaseInstanceId.getInstance().getToken());
 
         updateTokenToServer(FirebaseInstanceId.getInstance().getToken());
 
@@ -391,6 +391,8 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
     }
 
     private void updateTokenToServer(String token) {
+        FirebaseDatabase.getInstance().getReference("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .child("device_token").setValue(token);
     }
 
     @Override
@@ -440,7 +442,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
                 //dialog.setMax(totalItems);
                 for (int i = 0; i < totalItems; i++) {
                     Uri uri = clipData.getItemAt(i).getUri();
-                    message = "Sending " + (i + 1) + " of " + totalItems+" images please wait";
+                    message = "Sending " + (i + 1) + " of " + totalItems + " images please wait";
                     dialog.setMessage(message);
                     dialog.show();
                     String imageName = messageRef.push().getKey() + ".jpg";
@@ -724,20 +726,17 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
 
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
     }
-
     @Override
     protected void onPause() {
         super.onPause();
         if (markSeenRef != null && seenEventListener != null)
             markSeenRef.removeEventListener(seenEventListener);
-
     }
 
     @Override

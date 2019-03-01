@@ -97,6 +97,6 @@ public class Splash extends AppCompatActivity {
                     finish();
                 }
             }
-        }, Constants.SPLASH_TIME);
+        }, 0);
     }
 }
