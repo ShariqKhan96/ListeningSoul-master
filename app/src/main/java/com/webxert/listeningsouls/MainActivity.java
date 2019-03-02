@@ -349,7 +349,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     message_text.requestFocus();
-                                    sendNotificationToAdmins("text");
+                                    //sendNotificationToAdmins("text");
                                     ChatModel model = new ChatModel();
                                     model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                     model.setSeen(false);
@@ -362,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
                                     FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                             .setValue(model);
                                     displayMessages();
+                                    sendNotificationToAdmins("text");
 
                                 }
                             }).addOnFailureListener(new OnFailureListener() {

@@ -109,6 +109,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         id = getIntent().getStringExtra("id");
+        Log.e("Id", id);
         email = getIntent().getStringExtra("email");
         Toolbar toolbar = findViewById(R.id.toolbar);
 
@@ -174,7 +175,7 @@ public class ChatActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         //message_text.setText("");
-                                        sendNotificationToUser("text");
+                                         sendNotificationToUser("text");
                                         message_text.requestFocus();
 
                                         displayMessages();
@@ -303,8 +304,8 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void markStatusToSeen() {
-        seenReference = FirebaseDatabase.getInstance().getReference("chats").child(id);
-        seenReference.child("seen").setValue(true);
+        FirebaseDatabase.getInstance().getReference("chats").child(id).child("seen").setValue(true);
+        // seenReference.child("seen").setValue(true);
         markSeenRef = FirebaseDatabase.getInstance().getReference("Messages").child(id).child(Constants.DOMAIN_NAME);
         Query query = markSeenRef.limitToLast(1);
         seenEventListener = query.addValueEventListener(new ValueEventListener() {
@@ -313,9 +314,12 @@ public class ChatActivity extends AppCompatActivity {
 
                 if (dataSnapshot.getChildrenCount() > 0) {
                     MessageModel model = dataSnapshot.getChildren().iterator().next().getValue(MessageModel.class);
+                    Log.e("sender-receiver", model.getId_sender() + " " + model.getId_receiver());
 
-                    if (model.getId_sender().equals(id) && model.getId_receiver().equals(Constants.DOMAIN_NAME))
+                    if (model.getId_sender().equals(id) && model.getId_receiver().equals(Constants.DOMAIN_NAME)) {
                         updateChildren(dataSnapshot.getChildren().iterator().next().getRef(), model);
+                        Log.e("Why", "why");
+                    }
 
 
                 }
@@ -347,7 +351,7 @@ public class ChatActivity extends AppCompatActivity {
                     MessageModel model = data.getValue(MessageModel.class);
                     if (model.getId_sender().equals(id) && model.getId_receiver().equals(Constants.DOMAIN_NAME))
                         if (model.getStatus().equals("Not Seen"))
-                            data.getRef().child("status").setValue("Seen");
+                            data.getRef().child("status").setValue("seen");
                 }
             }
 
@@ -425,6 +429,7 @@ public class ChatActivity extends AppCompatActivity {
                                         public void onSuccess(Void aVoid) {
                                             message_text.requestFocus();
                                             displayMessages();
+                                            sendNotificationToUser("image");
 
                                         }
                                     }).addOnFailureListener(new OnFailureListener() {
@@ -812,7 +817,6 @@ public class ChatActivity extends AppCompatActivity {
                 int totalItems = clipData.getItemCount();
                 String message = "";
                 imageCount = totalItems;
-
                 //dialog.setMax(totalItems);
                 for (int i = 0; i < totalItems; i++) {
                     Uri uri = clipData.getItemAt(i).getUri();
@@ -843,18 +847,19 @@ public class ChatActivity extends AppCompatActivity {
                                     public void onSuccess(Void aVoid) {
                                         message_text.requestFocus();
 
-                                        ChatModel model = new ChatModel();
-                                        model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                        model.setSeen(false);
-                                        Date date = Calendar.getInstance().getTime();
-                                        Log.e("date", date.toString());
-                                        model.setDate(date);
-                                        model.setTimestamp(-1 * new Date().getTime());
-                                        model.setAssignedTo(Paper.book().read("assign_id", "None"));
-                                        model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
-                                        FirebaseDatabase.getInstance().getReference("chats").child(id)
-                                                .setValue(model);
+//                                        ChatModel model = new ChatModel();
+//                                        model.setId(id);
+//                                        model.setSeen(false);
+//                                        Date date = Calendar.getInstance().getTime();
+//                                        Log.e("date", date.toString());
+//                                        model.setDate(date);
+//                                        model.setTimestamp(-1 * new Date().getTime());
+//                                        model.setAssignedTo(Paper.book().read("assign_id", "None"));
+//                                        model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
+//                                        FirebaseDatabase.getInstance().getReference("chats").child(id)
+//                                                .setValue(model);
                                         displayMessages();
+                                        sendNotificationToUser("image");
 
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {

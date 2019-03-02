@@ -19,6 +19,8 @@ import com.webxert.listeningsouls.Splash;
 import com.webxert.listeningsouls.common.Common;
 import com.webxert.listeningsouls.common.Constants;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class MyFirebaseService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String s) {
@@ -60,7 +62,7 @@ public class MyFirebaseService extends FirebaseMessagingService {
             mNotificationManager.createNotificationChannel(channel);
         }
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), "default")
-                .setSmallIcon(R.mipmap.ic_launcher) // notification icon
+                .setSmallIcon(R.drawable.ls_launcher) // notification icon
                 .setContentTitle(notification.getData().get("title"))
                 // title for notification
                 .setContentText(content)
@@ -73,6 +75,16 @@ public class MyFirebaseService extends FirebaseMessagingService {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent pi = PendingIntent.getActivity(this, 123, intent, 0);
         mBuilder.setContentIntent(pi);
-        mNotificationManager.notify(0, mBuilder.build());
+        mNotificationManager.notify(NotificationID.getID(), mBuilder.build());
+    }
+
+
+}
+
+class NotificationID {
+    private final static AtomicInteger c = new AtomicInteger(0);
+
+    public static int getID() {
+        return c.incrementAndGet();
     }
 }
