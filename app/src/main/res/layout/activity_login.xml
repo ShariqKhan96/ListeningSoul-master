@@ -1,57 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/background"
+    android:orientation="vertical"
     tools:context="com.webxert.listeningsouls.LoginActivity">
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="wrap_content"
+        android:layout_height="220dp"
+        android:src="@drawable/ls_tp" />
+
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_gravity="center|center_vertical"
-        android:layout_margin="10dp"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/image"
+        android:layout_centerInParent="true"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="15dp">
+
         <LinearLayout
-        android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
 
             <android.support.design.widget.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="5dp">
+                android:padding="5dp"
+                android:layout_marginStart="5dp"
+                app:boxStrokeColor="@color/colorAccent"
+
+                app:boxStrokeWidth="2dp">
 
                 <EditText
-                    android:backgroundTint="@android:color/darker_gray"
+
                     android:id="@+id/email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="@android:color/darker_gray"
                     android:hint="Email"
-                    android:textColor="@android:color/black"
                     android:inputType="textEmailAddress"
                     android:maxLines="1"
                     android:singleLine="true"
+                    android:textColor="@android:color/black"
                     android:textSize="18sp" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="5dp">
+                android:padding="5dp"
+                android:layout_marginStart="5dp"
+                app:boxStrokeColor="@color/colorAccent"
+                app:boxStrokeWidth="2dp">
 
                 <EditText
                     android:id="@+id/password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="@android:color/darker_gray"
                     android:hint="Password"
-                    android:text="password"
-                    android:textColor="@android:color/black"
+
                     android:inputType="textPassword"
                     android:maxLines="1"
-                    android:backgroundTint="@android:color/darker_gray"
                     android:singleLine="true"
+
+                    android:textColor="@android:color/black"
                     android:textSize="18sp" />
 
             </android.support.design.widget.TextInputLayout>
@@ -63,45 +85,47 @@
                 android:backgroundTint="@color/colorPrimaryDark"
                 android:buttonTint="@color/colorPrimaryDark"
                 android:padding="5dp"
-                android:textSize="18sp"
-                android:text="login as admin" />
+                android:text="login as admin"
+                android:textSize="16sp" />
 
             <LinearLayout
-                android:layout_marginTop="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
                 android:orientation="horizontal"
-
                 android:weightSum="2">
 
                 <Button
-                    android:textSize="16sp"
-                    android:textAllCaps="false"
-                    android:text="Login"
-                    android:background="@drawable/button_layout"
                     android:id="@+id/login"
-                    android:layout_marginBottom="4dp"
-                    android:textColor="@android:color/black"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_marginBottom="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_layout"
+                    android:text="Login"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp" />
 
                 <Button
-                    android:textSize="16sp"
-                    android:textAllCaps="false"
-                    android:text="Register"
-                    android:layout_marginBottom="4dp"
-                    android:layout_marginStart="5dp"
-                    android:textColor="@android:color/black"
                     android:id="@+id/register"
-                    android:background="@drawable/button_layout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_layout"
+                    android:text="Register"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp" />
 
             </LinearLayout>
         </LinearLayout>
 
     </FrameLayout>
 
-</FrameLayout>
+</RelativeLayout>

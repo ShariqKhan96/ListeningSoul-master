@@ -51,6 +51,7 @@ import com.webxert.listeningsouls.Remote.RetrofitBuilder;
 import com.webxert.listeningsouls.adapters.ChatMessagesAdapter;
 import com.webxert.listeningsouls.common.Common;
 import com.webxert.listeningsouls.common.Constants;
+import com.webxert.listeningsouls.interfaces.BlockListener;
 import com.webxert.listeningsouls.interfaces.LogoutListener;
 import com.webxert.listeningsouls.models.ChatModel;
 import com.webxert.listeningsouls.models.DataMessage;
@@ -99,6 +100,9 @@ public class ChatActivity extends AppCompatActivity {
     String[] usersName;
     String[] usersIds;
     ProgressBar progressBar;
+    boolean isBlocked = false;
+    BlockListener blockListener;
+    private int imageCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,9 +111,21 @@ public class ChatActivity extends AppCompatActivity {
         id = getIntent().getStringExtra("id");
         email = getIntent().getStringExtra("email");
         Toolbar toolbar = findViewById(R.id.toolbar);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
+        FirebaseDatabase.getInstance().getReference("Users").child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
 
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
         retrofit = RetrofitBuilder.getRetrofit();
         client = retrofit.create(APIClient.class);
 
@@ -158,7 +174,7 @@ public class ChatActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         //message_text.setText("");
-                                        //sendNotificationToUser("text");
+                                        sendNotificationToUser("text");
                                         message_text.requestFocus();
 
                                         displayMessages();
@@ -191,10 +207,14 @@ public class ChatActivity extends AppCompatActivity {
 
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     User user = data.getValue(User.class);
-                    if (user.getId().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                    if (user.getId().equals(id)) {
                         Map<String, String> map = new HashMap<>();
                         map.put("title", Constants.DOMAIN_NAME_CAPITAL);
-                        map.put("message", "New " + type + " message from Admin");
+                        if (type.equals("text"))
+                            map.put("message", "New " + type + " message from Listening Souls");
+                        else
+                            map.put("message", imageCount + " new image(s) from Listening Souls");
+
                         DataMessage dataMessage = new DataMessage(user.getDevice_token(), map);
                         client.sendNotification(dataMessage).enqueue(new Callback<NotificationResponse>() {
                             @Override
@@ -339,6 +359,8 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void addNewMessage(ArrayList<SaverModel> arrayList, ArrayList<MessageModel> messages, ChatMessagesAdapter chatMessagesAdapter, SaverModel saverModel) {
+
+
         arrayList.add(saverModel);
         MessageModel mm = new MessageModel();
         mm.setId(saverModel.getMap().get("id"));
@@ -355,6 +377,8 @@ public class ChatActivity extends AppCompatActivity {
         messages.add(mm);
         chatMessagesAdapter.notifyDataSetChanged();
         recyclerView.scrollToPosition(chatMessagesAdapter.getItemCount() - 1);
+
+
     }
 
     @Override
@@ -366,6 +390,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void sendMediaAsAdmin(final Uri uri, final ProgressDialog dialog) {
 
+        imageCount = 1;
         AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
         builder.setTitle("Sending confirmation");
         builder.setMessage("Are you sure?");
@@ -786,11 +811,12 @@ public class ChatActivity extends AppCompatActivity {
                 DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference("Messages").child(id).child(Constants.DOMAIN_NAME);
                 int totalItems = clipData.getItemCount();
                 String message = "";
+                imageCount = totalItems;
 
                 //dialog.setMax(totalItems);
                 for (int i = 0; i < totalItems; i++) {
                     Uri uri = clipData.getItemAt(i).getUri();
-                    message = "Sending " + i + 1 + " of " + totalItems +" images please wait";
+                    message = "Sending " + (i + 1) + " of " + totalItems + " images please wait";
                     dialog.setMessage(message);
                     dialog.show();
                     String imageName = messageRef.push().getKey() + ".jpg";
@@ -826,7 +852,7 @@ public class ChatActivity extends AppCompatActivity {
                                         model.setTimestamp(-1 * new Date().getTime());
                                         model.setAssignedTo(Paper.book().read("assign_id", "None"));
                                         model.setWith(getSharedPreferences(Constants.SH_PREFS, MODE_PRIVATE).getString(Constants.USER_EMAIL, "null"));
-                                        FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                        FirebaseDatabase.getInstance().getReference("chats").child(id)
                                                 .setValue(model);
                                         displayMessages();
 
@@ -863,4 +889,13 @@ public class ChatActivity extends AppCompatActivity {
         // dialog.dismiss();
     }
 
+//    @Override
+//    public void onBlocked() {
+//        isBlocked = true;
+//    }
+//
+//    @Override
+//    public void onUnBlocked() {
+//        isBlocked = false;
+//    }
 }

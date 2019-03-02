@@ -88,6 +88,7 @@ public class AdminChatActivity extends AppCompatActivity {
     Retrofit retrofit;
     ImageView media_select;
     ProgressBar progressBar;
+    int imageCount = 0;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -152,7 +153,7 @@ public class AdminChatActivity extends AppCompatActivity {
 
                             message_text.requestFocus();
                             displayMessages();
-                            //  sendNotificationToAdmins("text");
+                            sendNotificationToAdmins("text");
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -196,7 +197,10 @@ public class AdminChatActivity extends AppCompatActivity {
 //                        NotificationSender sender = new NotificationSender(user.getDevice_token(), notification);
                         Map<String, String> map = new HashMap<>();
                         map.put("title", Constants.DOMAIN_NAME_CAPITAL);
-                        map.put("message", "New " + type + " message from " + Common.getPersonName(FirebaseAuth.getInstance().getCurrentUser().getUid()));
+                        if (type.equals("text"))
+                            map.put("message", "New " + type + " message from " + Common.getPersonName(FirebaseAuth.getInstance().getCurrentUser().getUid()) + " in admin group");
+                        else
+                            map.put("message", imageCount + " new image(s) from Listening Souls" + Common.getPersonName(FirebaseAuth.getInstance().getCurrentUser().getUid()) + " in admin group");
                         DataMessage dataMessage = new DataMessage(user.getDevice_token(), map);
 
 
@@ -230,6 +234,7 @@ public class AdminChatActivity extends AppCompatActivity {
 
     private void sendMediaAsAdmin(final Uri uri, final ProgressDialog dialog) {
 
+        imageCount = 1;
         AlertDialog.Builder builder = new AlertDialog.Builder(AdminChatActivity.this);
         builder.setTitle("Sending confirmation");
         builder.setMessage("Are you sure?");
@@ -261,7 +266,7 @@ public class AdminChatActivity extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     message_text.requestFocus();
-                                    //sendNotificationToAdmins("image");
+                                    sendNotificationToAdmins("image");
                                     displayMessages();
 
                                 }
@@ -430,6 +435,7 @@ public class AdminChatActivity extends AppCompatActivity {
                 // dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference("AdminMessages");
                 int totalItems = clipData.getItemCount();
+                imageCount = totalItems;
                 String message = "";
 
                 //dialog.setMax(totalItems);
@@ -474,6 +480,7 @@ public class AdminChatActivity extends AppCompatActivity {
                                                 FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                                         .setValue(model);
                                                 displayMessages();
+                                                sendNotificationToAdmins("image");
 
                                             }
                                         }).addOnFailureListener(new OnFailureListener() {

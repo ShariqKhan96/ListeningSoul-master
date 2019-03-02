@@ -25,8 +25,8 @@ public class MyFirebaseService extends FirebaseMessagingService {
         super.onNewToken(s);
         Log.e("NewToken", s);
         saveInSharedPrefs(s);
-        if (FirebaseAuth.getInstance().getCurrentUser() != null)
-            updateTokenToServer(FirebaseAuth.getInstance().getCurrentUser().getUid(), s);
+        //if (FirebaseAuth.getInstance().getCurrentUser() != null)
+        // updateTokenToServer(FirebaseAuth.getInstance().getCurrentUser().getUid(), s);
 
     }
 
@@ -70,8 +70,8 @@ public class MyFirebaseService extends FirebaseMessagingService {
                 .setAutoCancel(true);
         // clear notification after click
         Intent intent = new Intent(this, Splash.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pi = PendingIntent.getActivity(this, 123, intent, 0);
         mBuilder.setContentIntent(pi);
         mNotificationManager.notify(0, mBuilder.build());
     }

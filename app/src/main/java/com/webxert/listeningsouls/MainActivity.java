@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
     Retrofit retrofit;
     APIClient client;
     String myId;
+    private int imageCount = 0;
 
 
     @Override
@@ -236,7 +237,10 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
                     User user = data.getValue(User.class);
                     Map<String, String> map = new HashMap<>();
                     map.put("title", Constants.DOMAIN_NAME_CAPITAL);
-                    map.put("message", "New " + type + " message from Admin");
+                    if (type.equals("text"))
+                        map.put("message", "New " + type + " message from " + Common.getPersonName(FirebaseAuth.getInstance().getCurrentUser().getUid()));
+                    else
+                        map.put("message", imageCount + " new image(s) from " + Common.getPersonName(FirebaseAuth.getInstance().getCurrentUser().getUid()));
                     DataMessage dataMessage = new DataMessage(user.getDevice_token(), map);
                     client.sendNotification(dataMessage).enqueue(new Callback<NotificationResponse>() {
                         @Override
@@ -276,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
         retrofit = RetrofitBuilder.getRetrofit();
         client = retrofit.create(APIClient.class);
 
-        //Log.e("Token", FirebaseInstanceId.getInstance().getToken());
+        Log.e("Token", FirebaseInstanceId.getInstance().getToken());
 
         updateTokenToServer(FirebaseInstanceId.getInstance().getToken());
 
@@ -345,7 +349,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     message_text.requestFocus();
-                                    //sendNotificationToAdmins("text");
+                                    sendNotificationToAdmins("text");
                                     ChatModel model = new ChatModel();
                                     model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                     model.setSeen(false);
@@ -439,6 +443,9 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
                 dialog.setCanceledOnTouchOutside(false);
 
 
+                sendNotificationToAdmins("image");
+
+                imageCount = totalItems;
                 //dialog.setMax(totalItems);
                 for (int i = 0; i < totalItems; i++) {
                     Uri uri = clipData.getItemAt(i).getUri();
@@ -516,6 +523,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
     private void sendMediaAsUser(final Uri uri, final ProgressDialog dialog) {
 
 
+        imageCount = 1;
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Sending confirmation");
         builder.setMessage("Are you sure?");
@@ -548,6 +556,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
                                 public void onSuccess(Void aVoid) {
                                     message_text.requestFocus();
 
+
                                     ChatModel model = new ChatModel();
                                     model.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                     model.setSeen(false);
@@ -560,6 +569,7 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
                                     FirebaseDatabase.getInstance().getReference("chats").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                             .setValue(model);
                                     displayMessages();
+                                    sendNotificationToAdmins("image");
 
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
@@ -726,12 +736,14 @@ public class MainActivity extends AppCompatActivity implements LogoutListener, U
 
                 }
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
     }
+
     @Override
     protected void onPause() {
         super.onPause();

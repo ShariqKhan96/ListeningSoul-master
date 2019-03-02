@@ -101,7 +101,7 @@ public class UserChatMessageAdapter extends RecyclerView.Adapter<UserChatMessage
 
         if (arrayList.get(i).getIs_admin().equals("1")) {
             myVH.profile_image.setVisibility(View.VISIBLE);
-            myVH.personName.setText(arrayList.get(i).getEmail().substring(0, 1).toUpperCase());
+            myVH.personName.setText("LS");
         } else
             myVH.profile_image.setVisibility(View.GONE);
 
